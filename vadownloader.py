@@ -14,21 +14,28 @@ def create_dated_folder():
 
 def download_facility_data(station_number, output_folder):
     """
-    Download facility data for a given station number, saving only valid Excel files
+    Download facility data for a given station number, saving with original filename
     """
     url = f'https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={station_number}'
     
     try:
-        # Simple GET request with minimal headers
         response = requests.get(url)
         content_type = response.headers.get("Content-Type", "")
         
         if 'spreadsheetml.sheet' in content_type:
-            # This is an Excel file - save it with xlsx extension
-            output_file = output_folder / f'facility_data_{station_number}.xlsx'
+            # Get original filename from Content-Disposition header
+            content_disposition = response.headers.get('Content-Disposition', '')
+            if 'filename=' in content_disposition:
+                # Extract filename from the header
+                filename = content_disposition.split('filename=')[-1].strip('"\'')
+            else:
+                # Fallback to default naming if no filename provided
+                filename = f'facility_data_{station_number}.xlsx'
+            
+            output_file = output_folder / filename
             with open(output_file, 'wb') as f:
                 f.write(response.content)
-            print(f'Downloaded Excel file for station {station_number}')
+            print(f'Downloaded Excel file for station {station_number} as {filename}')
             return True
         else:
             print(f'Skipped station {station_number} - received {content_type}')
@@ -39,10 +46,12 @@ def download_facility_data(station_number, output_folder):
         return False
 
 def get_unique_station_ids(csv_path):
-    """Read and process the VA facilities CSV to get unique station IDs"""
+    """Read and process the simplified CSV to get station IDs"""
     try:
+        # Read CSV with a single column named 'identifier'
         df = pd.read_csv(csv_path, keep_default_na=False)
-        station_ids = df['Station ID'].dropna().unique()
+        # Get unique values from the identifier column and clean them
+        station_ids = df['identifier'].dropna().unique()
         station_ids = [str(id).strip() for id in station_ids if str(id).strip()]
         return sorted(set(station_ids))
     except Exception as e:
@@ -61,10 +70,10 @@ def main():
     
     output_folder = create_dated_folder()
     print(f'Downloading files to: {output_folder}')
-
+    
     successful_downloads = 0
     failed_downloads = []
-
+    
     for station in station_ids:
         time.sleep(2)  # Be nice to the server
         
@@ -72,7 +81,7 @@ def main():
             successful_downloads += 1
         else:
             failed_downloads.append(station)
-
+    
     print('\nDownload Summary:')
     print(f'Successfully downloaded: {successful_downloads} Excel files')
     print(f'Skipped or failed: {len(failed_downloads)} stations')
