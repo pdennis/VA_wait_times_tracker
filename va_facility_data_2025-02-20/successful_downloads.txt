@@ -1,5 +1,5 @@
-Download completed at: 2025-02-20 09:45:57
-Successfully downloaded 848 Excel files
+Download completed at: 2025-02-20 16:02:56
+Successfully downloaded 847 Excel files
 
 Station IDs with valid Excel files:
 358
@@ -358,7 +358,6 @@ Station IDs with valid Excel files:
 568HA
 568HB
 568HF
-568HH
 568HP
 570
 570GA
