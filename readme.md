@@ -5,7 +5,7 @@ This project aims to track changes in wait times at VA facilities over time, par
 
 ## Data Sources
 - Current wait time data: Individual facility performance data from the VA's Access to Care tool
-  - Source: https://www.accesstopwt.va.gov/FacilityPerformanceData/
+  - Source: https://www.accesstocare.va.gov/FacilityPerformanceData/
   - Data is available as XLSX downloads for each facility
 - Facility identifiers: Master list of VA facilities 
   - Source: https://www.va.gov/directory/guide/rpt_fac_list.cfm?sort=StaID&list_by=all&oid=all
@@ -45,9 +45,9 @@ The visualization script (`va_viz.py`):
 
 ## Requirements
 - Python 3.x
-- Required packages:
+- Required packages in `requirements.txt`:
 ```bash
-pip install pandas requests sqlite3 streamlit plotly
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -56,7 +56,14 @@ pip install pandas requests sqlite3 streamlit plotly
 ```bash
 python vadownloader.py
 ```
-Creates a new folder with today's date (e.g., `va_facility_data_2025-02-19`) and downloads all available facility data.
+Creates a new folder with today's date (e.g., `va_facility_data_2025-05-08`) and downloads all available facility data.
+
+### Automated Data Collection
+The project includes a shell script for scheduled execution:
+```bash
+./run_vadownloader.sh
+```
+This can be set up as a cron job for daily data collection.
 
 ### Database Updates
 ```bash
@@ -69,6 +76,11 @@ Processes all data folders and updates the SQLite database with new data.
 streamlit run va_viz.py
 ```
 Launches the interactive visualization dashboard in your web browser.
+
+## Project Status
+- Data collection began in February 2025
+- Daily data has been collected for approximately 3 months
+- The database now contains thousands of records spanning hundreds of facilities
 
 ## Project Goals
 1. Create a historical dataset of VA facility wait times that can be used to analyze trends
@@ -92,9 +104,8 @@ This is an open source project aimed at increasing transparency around veterans'
 
 ## Data Notes
 - Not all facility IDs in the master list actively report data
-- Data collection began in February 2025
-- Raw data files are saved with the naming convention: `facility_data_[STATION_ID].xlsx`
-- The SQLite database maintains a normalized and cleaned version of all historical data
+- Raw data files are saved with their original filenames from the VA system
+- The SQLite database (`va_wait_times.db`) maintains a normalized and cleaned version of all historical data
 - Wait times are tracked separately for new and established patients
 - Data is collected daily but some facilities may update less frequently
 
