@@ -109,6 +109,10 @@ This is an open source project aimed at increasing transparency around veterans'
 - Wait times are tracked separately for new and established patients
 - Data is collected daily but some facilities may update less frequently
 
+## GeoData
+- US Census maintains maps of the congressional districts as TIGER/Line shapefiles
+- https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2024&layergroup=Congressional+Districts+%28119%29
+
 ## Database Schema
 The SQLite database (`va_wait_times.db`) contains:
 - `facilities` table: Normalized facility names and IDs
