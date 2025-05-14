@@ -75,7 +75,6 @@ class ExtractLocations:
                 cols = []
                 col_no = 0
                 for col in row.find_all("td"):
-                    text = col.text.strip()
                     if col_no == 3:
                         text = self.extract_address(col)
                     else:
