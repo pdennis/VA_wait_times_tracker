@@ -58,11 +58,11 @@ class ExtractLocations:
         csv_file = csv_file.with_suffix(".csv")
 
         # open CSV File for output; this will overwrite any existing file content
-        with open(csv_file, "w", newline="") as csvfile:
+        with open(csv_file, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
 
             # write header
-            header = []
+            header=[]
             for col in rows[0].find_all("td"):
                 col_name = col.text.strip()
                 header.append(col_name)
@@ -84,7 +84,7 @@ class ExtractLocations:
                     if col_no == 1:
                         href = col.find(href=True)
                         if href:
-                            href = href["href"].lower().replace("http://", "").replace("https://", "")
+                            href = href['href'].lower().replace("http://", "").replace("https://", "")
                             cols.append(href)
                         else:
                             cols.append("")
@@ -120,9 +120,9 @@ class ExtractLocations:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Extract VA Facility Locations from HTML File")
-    parser.add_argument("html_file", metavar="html_file", help="HTML File to be parsed")
-    parser.add_argument("-csv_file", help="CSV File to be created")
+    parser = argparse.ArgumentParser('Extract VA Facility Locations from HTML File')
+    parser.add_argument('html_file', metavar='html_file', help='HTML File to be parsed')
+    parser.add_argument('-csv_file', help='CSV File to be created')
 
     args = parser.parse_args()
 
