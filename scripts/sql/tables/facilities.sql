@@ -45,7 +45,7 @@ drop table if exists station;
 CREATE TABLE IF NOT EXISTS station
 (
     station_id     TEXT primary key,
-    prefix         text,
+    prefix         text unique,
     active         bool,
     awol           bool                     default False,
     total_reports  int                      default 0,

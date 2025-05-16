@@ -113,6 +113,10 @@ class UpdateFacility:
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor() as update_cursor:
                 logger.info("Updating station table...")
-                x = update_cursor.execute("call update_stations();")
-                print(x)
+                update_cursor.execute("select count(*) from station;")
+                old_count = update_cursor.fetchone()[0]
+                update_cursor.execute("call update_stations();")
+                update_cursor.execute("select count(*) from station;")
+                new_count = update_cursor.fetchone()[0]
+                logger.info(f"Updated station table: {old_count} -> {new_count}")
                 conn.commit()
