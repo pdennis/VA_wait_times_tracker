@@ -138,3 +138,8 @@ VALUES ('78', 'VI', 'Virgin Islands');
 
 
 
+[Code: 0, SQL State: 42703]  ERROR: column state.stusps does not exist
+  Where: PL/pgSQL function geocode_location(norm_addy,geometry) line 9 at assignment
+PL/pgSQL function geocode(norm_addy,integer,geometry) line 66 at FOR over SELECT rows
+SQL statement "SELECT g.addy, g.geomout, g.rating FROM geocode(ADDY, max_results, restrict_geom) As g ORDER BY g.rating"
+PL/pgSQL function geocode(character varying,integer,geometry) line 26 at RETURN QUERY

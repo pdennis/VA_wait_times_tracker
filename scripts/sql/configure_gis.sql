@@ -18,9 +18,12 @@
 
 create extension pg_prewarm;
 CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_raster;
+CREATE EXTENSION postgis_sfcgal;
 CREATE EXTENSION fuzzystrmatch;
-CREATE EXTENSION postgis_tiger_geocoder;
 CREATE EXTENSION address_standardizer;
 CREATE EXTENSION address_standardizer_data_us;
-SELECT set_geocode_setting('use_pagc_address_parser', 'true');
+CREATE EXTENSION postgis_tiger_geocoder;
+CREATE EXTENSION postgis_topology;
+SELECT set_geocode_setting('use_pagc_address_parser', 'false');
 commit;
