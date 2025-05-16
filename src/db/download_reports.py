@@ -50,7 +50,7 @@ class DownloadReports(Thread):
                     try:
                         response = requests.get(VA_REPORT_URL.format(row.station_id))
                         content_type = response.headers.get("Content-Type", None)
-                        if content_type and "spreadsheetml.sheet" in content_type:
+                        if content_type and 'spreadsheetml.sheet' in content_type:
                             self.process_report(row, response)
                         else:
                             self.process_failure(row, response, conn)
@@ -69,7 +69,7 @@ class DownloadReports(Thread):
         logger.info(f"Skipping station {row.station_id} - received {content_type}")
         row.total_failures += 1
         row.last_failure = datetime.now()
-        if content_type and "text/html" in content_type:
+        if content_type and 'text/html' in content_type:
             row.active = False
         with conn.cursor() as cur:
             cur.execute(
