@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS station
     prefix         text unique,
     active         bool,
     awol           bool                     default False,
-    total_reports  int                      default 0,
     total_failures int                      default 0,
     last_report    TIMESTAMP WITH TIME ZONE,
     last_failure   TIMESTAMP WITH TIME ZONE,
