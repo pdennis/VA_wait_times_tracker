@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="Checkin pycharm files">
+    <list default="true" id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties">
       <change beforePath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sql/configure_gis.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/configure_gis.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/station_report.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/station_report.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/download_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/download_reports.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/station_report.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/reports.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +135,7 @@
       <workItem from="1747321572497" duration="46224000" />
       <workItem from="1747520624266" duration="429000" />
       <workItem from="1747521065410" duration="3387000" />
-      <workItem from="1747531366694" duration="5161000" />
+      <workItem from="1747531366694" duration="8141000" />
     </task>
     <task id="LOCAL-00001" summary="Added src module under which new code will go">
       <option name="closed" value="true" />
@@ -268,7 +265,39 @@
       <option name="project" value="LOCAL" />
       <updated>1747531959799</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook poroperties">
+      <option name="closed" value="true" />
+      <created>1747536591674</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1747536591674</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties">
+      <option name="closed" value="true" />
+      <created>1747536611722</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1747536611722</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties">
+      <option name="closed" value="true" />
+      <created>1747536676124</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1747536676124</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties">
+      <option name="closed" value="true" />
+      <created>1747536696524</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1747536696524</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -282,7 +311,9 @@
     <MESSAGE value="DDL to create, load, and update facility table" />
     <MESSAGE value="Start work on storing wait time reports in db" />
     <MESSAGE value="Checkin pycharm files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Checkin pycharm files" />
+    <MESSAGE value="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook poroperties" />
+    <MESSAGE value="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties" />
+    <option name="LAST_COMMIT_MESSAGE" value="Store excel files in Postgres&#10;Calculate hash for excel file that ignores workbook properties" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
