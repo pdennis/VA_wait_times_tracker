@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="Start work on storing wait time reports in db">
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/sql/configure_gis.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/configure_gis.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/station_report.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/station_report.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/download_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/download_reports.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="SQL File" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;cdswindell&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/pdennis/VA_wait_times_tracker.git&quot;,
+    &quot;accountId&quot;: &quot;3d4eaf51-ee21-48ab-911d-114c8223249d&quot;
+  }
+}</component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2x3KLh9P3BsifsoTcPBu0reVMxI" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.extract_locations.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/davids/Documents/dev/BridgeEnv/VA_wait_times_tracker&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;database.query.execution&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/scripts/sql" />
+      <recent name="$PROJECT_DIR$/scripts/sql/tables" />
+      <recent name="$PROJECT_DIR$/scripts/python" />
+      <recent name="$PROJECT_DIR$/data" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="extract_locations" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="VA_wait_times_tracker" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/python/extract_locations.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.extract_locations" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="" />
+      <created>1747161263045</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747161263045</updated>
+      <workItem from="1747161264397" duration="6869000" />
+      <workItem from="1747184275555" duration="10061000" />
+      <workItem from="1747233689228" duration="24604000" />
+      <workItem from="1747274721560" duration="6655000" />
+      <workItem from="1747321572497" duration="46224000" />
+      <workItem from="1747520624266" duration="429000" />
+      <workItem from="1747521065410" duration="3387000" />
+      <workItem from="1747531366694" duration="545000" />
+    </task>
+    <task id="LOCAL-00001" summary="Added src module under which new code will go">
+      <option name="closed" value="true" />
+      <created>1747161486833</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747161486833</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Added US Census link for TIGER shapefiles">
+      <option name="closed" value="true" />
+      <created>1747163333296</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1747163333296</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Wrote script to parse VA location information from website">
+      <option name="closed" value="true" />
+      <created>1747188054174</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1747188054175</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Wrote script to parse VA location information from website">
+      <option name="closed" value="true" />
+      <created>1747188072664</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1747188072664</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Wrote script to parse VA location information from website">
+      <option name="closed" value="true" />
+      <created>1747188218803</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1747188218803</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Better handling of special characters">
+      <option name="closed" value="true" />
+      <created>1747234192252</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1747234192252</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Better handling of special characters">
+      <option name="closed" value="true" />
+      <created>1747234210255</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1747234210255</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Comments">
+      <option name="closed" value="true" />
+      <created>1747243312880</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1747243312880</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Comments">
+      <option name="closed" value="true" />
+      <created>1747243360885</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1747243360885</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Code to load facilities_staging table from csv">
+      <option name="closed" value="true" />
+      <created>1747258292855</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1747258292855</updated>
+    </task>
+    <task id="LOCAL-00011" summary="DDL to create and load state table">
+      <option name="closed" value="true" />
+      <created>1747272120748</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1747272120748</updated>
+    </task>
+    <task id="LOCAL-00012" summary="DDL to create, load, and update facility table">
+      <option name="closed" value="true" />
+      <created>1747403617542</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1747403617542</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Start work on storing wait time reports in db">
+      <option name="closed" value="true" />
+      <created>1747409334263</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1747409334263</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Start work on storing wait time reports in db">
+      <option name="closed" value="true" />
+      <created>1747409397155</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1747409397155</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Start work on storing wait time reports in db">
+      <option name="closed" value="true" />
+      <created>1747448390530</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1747448390530</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added src module under which new code will go" />
+    <MESSAGE value="Added US Census link for TIGER shapefiles" />
+    <MESSAGE value="Wrote script to parse VA location information from website" />
+    <MESSAGE value="Better handling of special characters" />
+    <MESSAGE value="Comments" />
+    <MESSAGE value="Code to load facilities_staging table from csv" />
+    <MESSAGE value="DDL to create and load state table" />
+    <MESSAGE value="DDL to create, load, and update facility table" />
+    <MESSAGE value="Start work on storing wait time reports in db" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start work on storing wait time reports in db" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/db/download_reports.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/db/download_reports.py</url>
+          <line>117</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/db/download_reports.py</url>
+          <line>115</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/db/download_reports.py</url>
+          <line>95</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/VA_wait_times_tracker$extract_locations.coverage" NAME="extract_locations Coverage Results" MODIFIED="1747187249122" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+  </component>
+</project>
