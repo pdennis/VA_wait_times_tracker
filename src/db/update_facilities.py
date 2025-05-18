@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from pathlib import Path
 
 import psycopg
@@ -25,19 +24,6 @@ NORMALIZE_ADDRESSES = """
         address_parts = tiger.normalize_address(replace(replace(address, '(', ' '), ')', ' ')),
         phones = ARRAY(SELECT TRIM(both ' ' from unnest(string_to_array(COALESCE(phone, ''), 'Or'))));
 """
-
-
-@dataclass
-class FacilityStaging:
-    station_id: str
-    facility: str
-    website: str
-    address: str
-    state: str
-    phone: str
-    mailing_address: str
-    normalized_address: str
-    address_parts: tuple
 
 
 class UpdateFacility:

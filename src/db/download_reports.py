@@ -1,6 +1,5 @@
 import hashlib
 import io
-from dataclasses import dataclass
 from datetime import datetime
 from threading import Thread
 from time import sleep
@@ -13,43 +12,19 @@ from psycopg.rows import class_row
 from requests import Response
 
 from ..config.settings import DATABASE_URL, get_bridge_logger
+from .models import Station
 
 VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={}"
 ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
 
 OF_INTEREST_SHEETS = {
-    'wait times',
-    'satisfaction with care',
+    "wait times",
+    "satisfaction with care",
 }
 
 
 logger = get_bridge_logger(__name__)
-
-
-@dataclass
-class Station:
-    station_id: str
-    prefix: str
-    legacy: bool
-    active: bool
-    awol: bool
-    total_failures: int
-    last_report: datetime
-    last_failure: datetime
-    created: datetime
-    updated: datetime
-
-
-@dataclass
-class StationReport:
-    id: int
-    station_id: str
-    file_name: str
-    size: int
-    report: bytes
-    hash: bytes
-    downloaded: datetime
 
 
 class DownloadReports(Thread):
