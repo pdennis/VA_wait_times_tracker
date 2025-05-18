@@ -26,4 +26,5 @@ CREATE EXTENSION address_standardizer_data_us;
 CREATE EXTENSION postgis_tiger_geocoder;
 CREATE EXTENSION postgis_topology;
 SELECT set_geocode_setting('use_pagc_address_parser', 'false');
+CREATE EXTENSION PGCRYPTO;
 commit;

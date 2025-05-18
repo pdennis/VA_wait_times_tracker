@@ -45,7 +45,8 @@ drop table if exists station;
 CREATE TABLE IF NOT EXISTS station
 (
     station_id     TEXT primary key,
-    prefix         text unique,
+    prefix         text,
+    legacy         bool                     default false,
     active         bool,
     awol           bool                     default False,
     total_failures int                      default 0,
@@ -53,6 +54,13 @@ CREATE TABLE IF NOT EXISTS station
     last_failure   TIMESTAMP WITH TIME ZONE,
     created        TIMESTAMP WITH TIME ZONE default NOW(),
     updated        TIMESTAMP WITH TIME ZONE default NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_station_prefix ON station USING btree (prefix);
+
+drop table if exists station_legacy;
+CREATE TABLE IF NOT EXISTS station_legacy
+(
+    station_id TEXT primary key
 );
 
 --

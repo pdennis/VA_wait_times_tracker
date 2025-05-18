@@ -1,8 +1,11 @@
+import hashlib
+import io
 from dataclasses import dataclass
 from datetime import datetime
 from threading import Thread
 from time import sleep
 
+import pandas as pd
 import psycopg
 import requests
 from psycopg import Connection
@@ -12,7 +15,13 @@ from requests import Response
 from ..config.settings import DATABASE_URL, get_bridge_logger
 
 VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={}"
-STATION_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
+ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
+STATION_QUERY = "select * from station where station_id = %s;"
+
+OF_INTEREST_SHEETS = {
+    "wait times",
+    "satisfaction with care",
+}
 
 
 logger = get_bridge_logger(__name__)
@@ -22,6 +31,7 @@ logger = get_bridge_logger(__name__)
 class Station:
     station_id: str
     prefix: str
+    legacy: bool
     active: bool
     awol: bool
     total_failures: int
@@ -31,52 +41,101 @@ class Station:
     updated: datetime
 
 
+@dataclass
+class StationReport:
+    id: int
+    station_id: str
+    file_name: str
+    size: int
+    report: bytes
+    hash: bytes
+    downloaded: datetime
+
+
 class DownloadReports(Thread):
-    def __init__(self, pause: float = 2) -> None:
+    def __init__(self, station_id: str = None, pause: float = 2) -> None:
         self.database_url = DATABASE_URL
         if not self.database_url:
             raise ValueError("Database URL is required")
 
         super().__init__(daemon=True, name="DownloadReports")
         self.pause = pause
-        self.start()
+        if station_id:
+            with psycopg.connect(self.database_url) as conn:
+                with conn.cursor(row_factory=class_row(Station)) as cur:
+                    cur.execute(STATION_QUERY, (station_id,))
+                    for row in cur:
+                        self.get_station_report(row, conn)
+        else:
+            self.start()
 
     def run(self) -> None:
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor(row_factory=class_row(Station)) as cur:
-                cur.execute(STATION_QUERY)
+                cur.execute(ALL_STATIONS_QUERY)
                 for row in cur:
-                    logger.info(f"Downloading report for station: {row.station_id}...")
-                    try:
-                        response = requests.get(VA_REPORT_URL.format(row.station_id))
-                        content_type = response.headers.get("Content-Type", None)
-                        if content_type and "spreadsheetml.sheet" in content_type:
-                            self.process_report(row, response, conn)
-                        else:
-                            self.process_failure(row, response, conn)
-                    except Exception as e:
-                        print(f"Error downloading station {row.station_id}: {e}")
+                    self.get_station_report(row, conn)
                     # don't overload VA servers
                     sleep(self.pause)
+
+    def get_station_report(self, row: Station, conn: Connection):
+        logger.info(f"Downloading report for station: {row.station_id}...")
+        response = None
+        try:
+            response = requests.get(VA_REPORT_URL.format(row.station_id))
+            content_type = response.headers.get("Content-Type", None)
+            if content_type and "spreadsheetml.sheet" in content_type:
+                self.process_report(row, response, conn)
+            else:
+                self.process_failure(row, response, conn)
+        except Exception as e:
+            sc = f"Status: {response.status_code}" if response else "N/A"
+            print(f"Error downloading station {row.station_id}: {sc} {e}")
 
     def process_report(self, row: Station, response: Response, conn: Connection) -> None:
         logger.info(f"Processing report for station: {row.station_id}...")
         cd_dict = self.parse_content_disposition(response.headers.get("Content-Disposition", None))
+        prefix_updated = False
         if not row.prefix and cd_dict.get("prefix", None):
             row.prefix = cd_dict["prefix"]
-        row.last_report = datetime.now()
-        row.awol = False
-        row.active = True
+            prefix_updated = True
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                    update station
-                        set prefix = %s, awol = false, active = true, last_report = Now(), updated = Now()
-                        where station_id = %s;
-                    """,
-                (row.prefix, row.station_id),
-            )
-            conn.commit()
+            try:
+                sha = self.hash_excel_data(cd_dict["filename"], response.content)
+                if sha:
+                    row.awol = False
+                    row.active = True
+                    cur.execute(
+                        """
+                            insert into station_report (station_id, file_name, size, report, hash)
+                                values (%s, %s, %s, %s, %s);
+                            """,
+                        (
+                            row.station_id,
+                            cd_dict["filename"],
+                            response.headers["Content-Length"],
+                            response.content,
+                            sha,
+                        ),
+                    )
+                    cur.execute(
+                        """
+                            update station
+                                set prefix = %s, awol = false, active = true, last_report = Now(), updated = Now()
+                                where station_id = %s;
+                            """,
+                        (row.prefix, row.station_id),
+                    )
+                    conn.commit()
+                else:
+                    if prefix_updated:
+                        cur.execute(
+                            "update station set prefix = %s where station_id = %s;",
+                            (row.prefix, row.station_id),
+                        )
+                        conn.commit()
+            except psycopg.errors.UniqueViolation:
+                logger.info(f"Report for station {row.station_id} already processed, ignoring...")
 
     @staticmethod
     def process_failure(row: Station, response: Response, conn: Connection) -> None:
@@ -107,3 +166,30 @@ class DownloadReports(Thread):
                 # noinspection PyUnresolvedReferences
                 cd["prefix"] = filename.split(" - ", 1)[0].strip()
         return cd
+
+    @staticmethod
+    def hash_excel_data(file_name: str, excel_bytes: bytes) -> bytes | None:
+        """
+        Calculates a hash of an Excel workbook, ignoring most properties
+        by hashing the data in each sheet.
+
+        Returns:
+            str: A hexadecimal hash string.
+        """
+        of_interest_workbook = False
+        all_sheet_data = [file_name.encode("utf-8")]
+        try:
+            xls = pd.ExcelFile(io.BytesIO(excel_bytes))
+            for sheet_name in xls.sheet_names:
+                if sheet_name.lower() in OF_INTEREST_SHEETS:
+                    of_interest_workbook = True
+                df = pd.read_excel(xls, sheet_name=sheet_name)
+                all_sheet_data.append(df.to_string().encode("utf-8"))
+            if of_interest_workbook is False:
+                return None
+        except Exception as e:
+            print(f"Error reading excel file: {e}")
+            return None
+
+        # Combine the string representations of all sheets and compute hash
+        return hashlib.sha512(b"".join(all_sheet_data), usedforsecurity=False).digest()
