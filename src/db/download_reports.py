@@ -19,8 +19,8 @@ ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True 
 STATION_QUERY = "select * from station where station_id = %s;"
 
 OF_INTEREST_SHEETS = {
-    'wait times',
-    'satisfaction with care',
+    "wait times",
+    "satisfaction with care",
 }
 
 
@@ -171,7 +171,9 @@ class DownloadReports(Thread):
     def hash_excel_data(file_name: str, excel_bytes: bytes) -> bytes | None:
         """
         Calculates a hash of an Excel workbook, ignoring most properties
-        by hashing the data in each sheet.
+        by hashing the data in each sheet. This is necessary because the
+        file creation date is included in the properties, causing files
+        with the same data to have different hashes.
 
         Returns:
             str: A hexadecimal hash string.
