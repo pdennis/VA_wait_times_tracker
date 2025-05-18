@@ -19,8 +19,8 @@ ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True 
 STATION_QUERY = "select * from station where station_id = %s;"
 
 OF_INTEREST_SHEETS = {
-    "wait times",
-    "satisfaction with care",
+    'wait times',
+    'satisfaction with care',
 }
 
 
