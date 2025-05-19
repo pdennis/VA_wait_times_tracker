@@ -77,7 +77,8 @@ class StationReport:
                 """
                     insert into station_report
                         (station_id, file_name, size, report, report_hash, downloaded)
-                        values (%s, %s, %s, %s, %s, now())  returning *;
+                        values (%s, %s, %s, %s, %s, coalesce(%s, now()))
+                    returning *;
                     """,
                 (
                     self.station_id,
@@ -85,6 +86,7 @@ class StationReport:
                     self.size,
                     self.report,
                     self.report_hash,
+                    self.downloaded,
                 ),
             )
             report = cur.fetchone()
@@ -107,7 +109,9 @@ class WaitTimeReport:
                 """
                     insert into wait_time_report
                         (station_id, report_id, report_date, appointment_type, established, new, source)
-                        values (%s, %s, %s, %s, %s, %s, %s);
+                        values (%s, %s, %s, %s, %s, %s, %s)
+                        on conflict (station_id, report_date, appointment_type)
+                        do update set established = excluded.established, new = excluded.new, source = excluded.source;
                     """,
                 (
                     self.station_id,
@@ -135,7 +139,15 @@ class SatisfactionReport:
                 """
                     insert into satisfaction_report
                         (station_id, report_id, report_date, appointment_type, percent)
-                        values (%s, %s, %s, %s, %s);
+                        values (%s, %s, %s, %s, %s)
+                        on conflict (station_id, report_date, appointment_type)
+                        do update set percent = excluded.percent;
                     """,
-                (self.station_id, self.report_id, self.report_date, self.appointment_type, self.percent),
+                (
+                    self.station_id,
+                    self.report_id,
+                    self.report_date,
+                    self.appointment_type,
+                    self.percent,
+                ),
             )
