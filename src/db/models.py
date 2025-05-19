@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Self
 
+import psycopg
 from psycopg import Connection
 from psycopg.rows import class_row
+
+from ..config.settings import DATABASE_URL
 
 
 @dataclass
@@ -32,6 +37,18 @@ class Station:
     last_failure: datetime | None
     created: datetime
     updated: datetime
+
+    @staticmethod
+    def by_prefix(prefix: str, conn: Connection = None) -> Station | None:
+        if conn:
+            with conn.cursor(row_factory=class_row(Station)) as cur:
+                cur.execute("select * from station where prefix = %s;", (prefix.strip(),))
+                return cur.fetchone()
+        else:
+            with psycopg.connect(DATABASE_URL) as conn:
+                with conn.cursor(row_factory=class_row(Station)) as cur:
+                    cur.execute("select * from station where prefix = %s;", (prefix.strip(),))
+                    return cur.fetchone()
 
 
 @dataclass

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import math
 from datetime import datetime
 from threading import Thread
 from time import sleep
@@ -127,22 +128,28 @@ class DownloadReports(Thread):
                     conn.commit()
                 logger.info(f"Processed {np} sheet(s) for station {row.station_id}")
             except psycopg.errors.UniqueViolation:
+                conn.rollback()
                 logger.info(f"Report for station {row.station_id} already processed, ignoring...")
 
     @staticmethod
     def process_failure(row: Station, response: Response, conn: Connection) -> None:
-        content_type = response.headers.get("Content-Type", None)
-        logger.info(f"Skipping station {row.station_id} - received {content_type}")
-        row.total_failures += 1
-        row.last_failure = datetime.now()
-        if content_type and "text/html" in content_type:
-            row.active = False
-        with conn.cursor() as cur:
-            cur.execute(
-                "update station set active = %s, total_failures = %s, last_failure = %s where station_id = %s;",
-                (row.active, row.total_failures, row.last_failure, row.station_id),
-            )
-            conn.commit()
+        try:
+            content_type = response.headers.get("Content-Type", None)
+            logger.info(f"Skipping station {row.station_id} - received {content_type}")
+            row.total_failures += 1
+            row.last_failure = datetime.now()
+            if content_type and "text/html" in content_type:
+                row.active = False
+            with conn.cursor() as cur:
+                cur.execute(
+                    "update station set active = %s, total_failures = %s, last_failure = %s where station_id = %s;",
+                    (row.active, row.total_failures, row.last_failure, row.station_id),
+                )
+                conn.commit()
+        except Exception as e:
+            conn.rollback()  # Roll back the transaction if anything goes wrong
+            logger.exception(f"Error in process_failure for station {row.station_id}: {e}")
+            raise  # Re-raise the exception after rolling back
 
     @staticmethod
     def parse_content_disposition(content_disposition: str) -> dict[str, str]:
@@ -210,7 +217,7 @@ class DownloadReports(Thread):
                 row.AppointmentType,
                 row.EstablishedPatients,
                 row.NewPatients,
-                row.DataSource
+                row.DataSource,
             )
             wtr.insert(conn)
         conn.commit()
@@ -218,12 +225,19 @@ class DownloadReports(Thread):
     @staticmethod
     def process_satisfaction_with_care(report: StationReport, df: DataFrame, conn: Connection):
         for index, row in df.iterrows():
+            # massage Percent value
+            if isinstance(row.Percent, str):
+                percent = float(row.Percent.strip("%"))
+            elif row.Percent and math.isnan(row.Percent):
+                percent = None
+            else:
+                percent = float(row.Percent)
             sr = SatisfactionReport(
                 report.station_id,
                 report.report_id,
                 row.ReportDate.date(),
                 row.AppointmentType,
-                float(row.Percent.strip("%")) if row.Percent else None,
+                percent,
             )
             sr.insert(conn)
         conn.commit()

@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="Process wait time and satisfaction sheets">
-      <change afterPath="$PROJECT_DIR$/src/legacy/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/legacy/legacy_report_loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/download_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/download_reports.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +134,7 @@
       <workItem from="1747321572497" duration="46224000" />
       <workItem from="1747520624266" duration="429000" />
       <workItem from="1747521065410" duration="3387000" />
-      <workItem from="1747531366694" duration="27536000" />
+      <workItem from="1747531366694" duration="33975000" />
     </task>
     <task id="LOCAL-00001" summary="Added src module under which new code will go">
       <option name="closed" value="true" />
@@ -342,7 +344,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747616093109</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Process wait time and satisfaction sheets">
+      <option name="closed" value="true" />
+      <created>1747616884153</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1747616884153</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -368,8 +378,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/db/download_reports.py</url>
-          <line>65</line>
-          <option name="timeStamp" value="28" />
+          <line>67</line>
+          <option name="timeStamp" value="50" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
