@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import io
 from datetime import datetime
@@ -7,21 +9,17 @@ from time import sleep
 import pandas as pd
 import psycopg
 import requests
+from pandas import DataFrame, ExcelFile
 from psycopg import Connection
 from psycopg.rows import class_row
 from requests import Response
 
 from ..config.settings import DATABASE_URL, get_bridge_logger
-from .models import Station
+from .models import SatisfactionReport, Station, StationReport, WaitTimeReport
 
 VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={}"
 ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
-
-OF_INTEREST_SHEETS = {
-    "wait times",
-    "satisfaction with care",
-}
 
 
 logger = get_bridge_logger(__name__)
@@ -74,25 +72,22 @@ class DownloadReports(Thread):
         if not row.prefix and cd_dict.get("prefix", None):
             row.prefix = cd_dict["prefix"]
             prefix_updated = True
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=class_row(StationReport)) as cur:
             try:
                 sha = self.hash_excel_data(cd_dict["filename"], response.content)
                 if sha:
+                    report = StationReport(
+                        report_id=0,
+                        station_id=row.station_id,
+                        file_name=cd_dict["filename"],
+                        size=int(response.headers["Content-Length"]),
+                        report=response.content,
+                        report_hash=sha[0],
+                        downloaded=datetime.now(),
+                    )
+                    report = report.insert(conn)
                     row.awol = False
                     row.active = True
-                    cur.execute(
-                        """
-                            insert into station_report (station_id, file_name, size, report, hash)
-                                values (%s, %s, %s, %s, %s);
-                            """,
-                        (
-                            row.station_id,
-                            cd_dict["filename"],
-                            response.headers["Content-Length"],
-                            response.content,
-                            sha,
-                        ),
-                    )
                     cur.execute(
                         """
                             update station
@@ -102,13 +97,18 @@ class DownloadReports(Thread):
                         (row.prefix, row.station_id),
                     )
                     conn.commit()
+
+                    # Save Excel workbook sheet(s), as appropriate
+                    np = self.process_excel_sheets(report, sha[1], conn)
                 else:
+                    np = 0
                     if prefix_updated:
                         cur.execute(
                             "update station set prefix = %s where station_id = %s;",
                             (row.prefix, row.station_id),
                         )
                         conn.commit()
+                logger.info(f"Processed {np} sheet(s) for station {row.station_id}")
             except psycopg.errors.UniqueViolation:
                 logger.info(f"Report for station {row.station_id} already processed, ignoring...")
 
@@ -143,7 +143,7 @@ class DownloadReports(Thread):
         return cd
 
     @staticmethod
-    def hash_excel_data(file_name: str, excel_bytes: bytes) -> bytes | None:
+    def hash_excel_data(file_name: str, excel_bytes: bytes) -> tuple[bytes, ExcelFile] | None:
         """
         Calculates a hash of an Excel workbook, ignoring most properties
         by hashing the data in each sheet. This is necessary because the
@@ -169,4 +169,53 @@ class DownloadReports(Thread):
             return None
 
         # Combine the string representations of all sheets and compute hash
-        return hashlib.sha512(b"".join(all_sheet_data), usedforsecurity=False).digest()
+        return hashlib.sha512(b"".join(all_sheet_data), usedforsecurity=False).digest(), xls
+
+    @staticmethod
+    def process_excel_sheets(report: StationReport, workbook: ExcelFile, conn: Connection) -> int:
+        num_processed = 0
+        for sheet_name in workbook.sheet_names:
+            handler = OF_INTEREST_SHEETS.get(sheet_name.lower(), None)
+            if handler:
+                logger.info(f"Processing Excel sheet: {sheet_name}...")
+                df = pd.read_excel(workbook, sheet_name=sheet_name)
+                handler(report, df, conn)
+                num_processed += 1
+        return num_processed
+
+    @staticmethod
+    def process_wait_times(report: StationReport, df: DataFrame, conn: Connection):
+        for index, row in df.iterrows():
+            wtr = WaitTimeReport(
+                report.station_id,
+                report.report_id,
+                row.ReportDate.date(),
+                row.AppointmentType,
+                row.EstablishedPatients,
+                row.NewPatients,
+                row.DataSource,
+            )
+            wtr.insert(conn)
+        conn.commit()
+
+    @staticmethod
+    def process_satisfaction_with_care(report: StationReport, df: DataFrame, conn: Connection):
+        for index, row in df.iterrows():
+            sr = SatisfactionReport(
+                report.station_id,
+                report.report_id,
+                row.ReportDate.date(),
+                row.AppointmentType,
+                float(row.Percent.strip("%")) if row.Percent else None,
+            )
+            sr.insert(conn)
+        conn.commit()
+
+
+# Rather than use an if/elif/else loop, associate the handler method to persist
+# an Excel sheet in the dict below. This dict doubles as a means of determining
+# if a given workbook is of interest to us.
+OF_INTEREST_SHEETS = {
+    "wait times": DownloadReports.process_wait_times,
+    "satisfaction with care": DownloadReports.process_satisfaction_with_care,
+}
