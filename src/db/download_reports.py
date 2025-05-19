@@ -18,7 +18,7 @@ from ..config.settings import DATABASE_URL, get_bridge_logger
 from .models import SatisfactionReport, Station, StationReport, WaitTimeReport
 
 VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={}"
-ALL_STATIONS_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
+ALL_STATIONS_QUERY = "select * from station where germane = true and coalesce(active, true) = True order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
 
 
@@ -63,7 +63,9 @@ class DownloadReports(Thread):
                 self.process_failure(row, response, conn)
         except Exception as e:
             sc = f"Status: {response.status_code}" if response else "N/A"
-            print(f"Error downloading station {row.station_id}: {sc} {e}")
+            logger.exception(f"Error downloading station {row.station_id}: {sc} {e}", exc_info=True)
+            if response:
+                self.process_failure(row, response, conn)
 
     def process_report(self, row: Station, response: Response, conn: Connection) -> None:
         logger.info(f"Processing report for station: {row.station_id}...")
@@ -91,7 +93,8 @@ class DownloadReports(Thread):
                     cur.execute(
                         """
                             update station
-                                set prefix = %s, awol = false, active = true, last_report = Now(), updated = Now()
+                                set prefix = %s, awol = false, active = true, germane=true,
+                                    last_report = now(), updated = now()
                                 where station_id = %s;
                             """,
                         (row.prefix, row.station_id),
@@ -104,10 +107,24 @@ class DownloadReports(Thread):
                     np = 0
                     if prefix_updated:
                         cur.execute(
-                            "update station set prefix = %s where station_id = %s;",
+                            """
+                                update station
+                                    set prefix = %s , germane = false, last_report = Now(), updated = Now()
+                                    where station_id = %s;
+                            """,
                             (row.prefix, row.station_id),
                         )
-                        conn.commit()
+                    else:
+                        # we must enclose query parameters in parens to make it a tuple
+                        cur.execute(
+                            """
+                                update station
+                                    set germane = false, last_report = Now(), updated = Now()
+                                    where station_id = %s;
+                            """,
+                            (row.station_id,),
+                        )
+                    conn.commit()
                 logger.info(f"Processed {np} sheet(s) for station {row.station_id}")
             except psycopg.errors.UniqueViolation:
                 logger.info(f"Report for station {row.station_id} already processed, ignoring...")
@@ -193,7 +210,7 @@ class DownloadReports(Thread):
                 row.AppointmentType,
                 row.EstablishedPatients,
                 row.NewPatients,
-                row.DataSource
+                row.DataSource,
             )
             wtr.insert(conn)
         conn.commit()

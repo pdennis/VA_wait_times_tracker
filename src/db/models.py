@@ -25,6 +25,7 @@ class Station:
     prefix: str
     legacy: bool
     active: bool
+    germane: bool
     awol: bool
     total_failures: int
     last_report: datetime | None

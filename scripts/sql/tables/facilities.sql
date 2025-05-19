@@ -41,15 +41,16 @@ CREATE INDEX IF NOT EXISTS ix_facility_shuttered_address ON facility_shuttered U
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_state ON facility_shuttered USING btree (state);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_awol ON facility_shuttered USING btree (awol);
 
-drop table if exists station;
+drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
 (
     station_id     TEXT primary key,
     prefix         text,
-    legacy         bool                     default false,
+    legacy         bool not null            default false,
     active         bool,
-    awol           bool                     default False,
-    total_failures int                      default 0,
+    germane        bool not null            default true,
+    awol           bool not null            default False,
+    total_failures int  not null            default 0,
     last_report    TIMESTAMP WITH TIME ZONE,
     last_failure   TIMESTAMP WITH TIME ZONE,
     created        TIMESTAMP WITH TIME ZONE default NOW(),
