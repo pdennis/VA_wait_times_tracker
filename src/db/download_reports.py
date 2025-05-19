@@ -19,7 +19,11 @@ from ..config.settings import DATABASE_URL, get_bridge_logger
 from .models import SatisfactionReport, Station, StationReport, WaitTimeReport
 
 VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/FacilityDataExcel?stationNumber={}"
-ALL_STATIONS_QUERY = "select * from station where germane = true and coalesce(active, true) = True order by station_id;"
+ALL_STATIONS_GERMANE_QUERY = """
+    select * from station where germane = true and coalesce(active, true) = True order by station_id;
+"""
+ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
+ALL_STATIONS_QUERY = "select * from station order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
 
 
@@ -27,13 +31,19 @@ logger = get_bridge_logger(__name__)
 
 
 class DownloadReports(Thread):
-    def __init__(self, station_id: str = None, pause: float = 2) -> None:
+    def __init__(
+        self,
+        station_id: str = None,
+        pause: float = 2,
+        only_germane: bool = True,
+    ) -> None:
         self.database_url = DATABASE_URL
         if not self.database_url:
             raise ValueError("Database URL is required")
 
         super().__init__(daemon=True, name="DownloadReports")
         self.pause = pause
+        self.only_germane = only_germane
         if station_id:
             with psycopg.connect(self.database_url) as conn:
                 with conn.cursor(row_factory=class_row(Station)) as cur:
@@ -46,7 +56,10 @@ class DownloadReports(Thread):
     def run(self) -> None:
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor(row_factory=class_row(Station)) as cur:
-                cur.execute(ALL_STATIONS_QUERY)
+                if self.only_germane is True:
+                    cur.execute(ALL_STATIONS_GERMANE_QUERY)
+                else:
+                    cur.execute(ALL_STATIONS_ACTIVE_QUERY)
                 for row in cur:
                     self.get_station_report(row, conn)
                     # don't overload VA servers
@@ -217,7 +230,7 @@ class DownloadReports(Thread):
                 row.AppointmentType,
                 row.EstablishedPatients,
                 row.NewPatients,
-                row.DataSource
+                row.DataSource,
             )
             wtr.insert(conn)
         conn.commit()
