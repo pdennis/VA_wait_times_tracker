@@ -217,7 +217,7 @@ class DownloadReports(Thread):
                 row.AppointmentType,
                 row.EstablishedPatients,
                 row.NewPatients,
-                row.DataSource,
+                row.DataSource
             )
             wtr.insert(conn)
         conn.commit()
