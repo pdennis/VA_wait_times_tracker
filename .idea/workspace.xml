@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="076d2289-5675-4475-aaa1-7b523e1b1cb2" name="Changes" comment="Process wait time and satisfaction sheets">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/bridge.iaOyrQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/bridge.iaOyrQ/schema/public.abK9xQ.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/bridge.iaOyrQ/schema/tiger.v_CTBg.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c26ec7ea-867a-48b7-a3ef-4d58785e0ee2/storage_v2/_src_/database/bridge.iaOyrQ/schema/tiger.v_CTBg.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/legacy/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sql/tables/facilities.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/download_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/download_reports.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +132,7 @@
       <workItem from="1747321572497" duration="46224000" />
       <workItem from="1747520624266" duration="429000" />
       <workItem from="1747521065410" duration="3387000" />
-      <workItem from="1747531366694" duration="26790000" />
+      <workItem from="1747531366694" duration="27536000" />
     </task>
     <task id="LOCAL-00001" summary="Added src module under which new code will go">
       <option name="closed" value="true" />
@@ -331,7 +326,23 @@
       <option name="project" value="LOCAL" />
       <updated>1747613875313</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Process wait time and satisfaction sheets">
+      <option name="closed" value="true" />
+      <created>1747616084598</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1747616084598</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Process wait time and satisfaction sheets">
+      <option name="closed" value="true" />
+      <created>1747616093109</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1747616093109</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
