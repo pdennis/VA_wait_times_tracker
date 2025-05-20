@@ -14,7 +14,7 @@ GitPython==3.1.44
 idna==3.10
 Jinja2 >= 3.1.6
 jsonschema==4.23.0
-jsonschema-specifications==2024.10.1
+jsonschema-specifications >= 2025.4.1
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
@@ -23,8 +23,8 @@ numpy==2.2.3
 openpyxl==3.1.5
 packaging==24.2
 pandas==2.2.3
-pillow==11.1.0
-plotly==6.0.0
+pillow >= 11.2.1
+plotly >= 6.1.0
 protobuf==5.29.3
 psycopg >= 3.2.9
 pyarrow==19.0.1
@@ -41,10 +41,10 @@ rpds-py==0.22.3
 ruff >= 0.11.9
 six==1.17.0
 smmap==5.0.2
-streamlit==1.42.1
+streamlit >= 1.45.1
 tenacity==9.0.0
 toml==0.10.2
 tornado==6.4.2
 typing_extensions==4.12.2
 tzdata==2025.1
-urllib3==2.3.0
+urllib3 >= 2.4.0

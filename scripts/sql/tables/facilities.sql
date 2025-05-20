@@ -19,6 +19,7 @@ CREATE INDEX IF NOT EXISTS ix_facility_website ON facility USING btree (website)
 CREATE INDEX IF NOT EXISTS ix_facility_address ON facility USING btree (address);
 CREATE INDEX IF NOT EXISTS ix_facility_mailing_address ON facility USING btree (mailing_address);
 CREATE INDEX IF NOT EXISTS ix_facility_state ON facility USING btree (state);
+CREATE INDEX ix_facility_facility_state ON facility ((facility || ' - ' || state));
 
 drop table if exists facility_shuttered;
 CREATE TABLE IF NOT EXISTS facility_shuttered
