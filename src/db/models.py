@@ -77,7 +77,7 @@ class StationReport:
                 """
                     insert into station_report
                         (station_id, file_name, size, report, report_hash, downloaded)
-                        values (%s, %s, %s, %s, %s, coalesce(%s, now()))
+                        values (%s, lower(%s), %s, %s, %s, coalesce(%s, now()))
                     returning *;
                     """,
                 (
@@ -109,7 +109,7 @@ class WaitTimeReport:
                 """
                     insert into wait_time_report
                         (station_id, report_id, report_date, appointment_type, established, new, source)
-                        values (%s, %s, %s, %s, %s, %s, %s)
+                        values (%s, %s, %s, upper(%s), %s, %s, %s)
                         on conflict (station_id, report_date, appointment_type)
                         do update set established = excluded.established, new = excluded.new, source = excluded.source;
                     """,
@@ -139,7 +139,7 @@ class SatisfactionReport:
                 """
                     insert into satisfaction_report
                         (station_id, report_id, report_date, appointment_type, percent)
-                        values (%s, %s, %s, %s, %s)
+                        values (%s, %s, %s, upper(%s), %s)
                         on conflict (station_id, report_date, appointment_type)
                         do update set percent = excluded.percent;
                     """,
