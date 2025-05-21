@@ -54,7 +54,6 @@ class DownloadReports(Thread):
         else:
             print(station_id, pause, only_germane)
             self.start()
-            self.join()
 
     def run(self) -> None:
         with psycopg.connect(self.database_url) as conn:
