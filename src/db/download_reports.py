@@ -44,6 +44,7 @@ class DownloadReports(Thread):
         super().__init__(daemon=True, name="DownloadReports")
         self.pause = pause
         self.only_germane = only_germane
+
         if station_id:
             with psycopg.connect(self.database_url) as conn:
                 with conn.cursor(row_factory=class_row(Station)) as cur:
@@ -51,11 +52,15 @@ class DownloadReports(Thread):
                     for row in cur:
                         self.get_station_report(row, conn)
         else:
+            print(station_id, pause, only_germane)
             self.start()
+            self.join()
 
     def run(self) -> None:
         with psycopg.connect(self.database_url) as conn:
+            print(self.database_url)
             with conn.cursor(row_factory=class_row(Station)) as cur:
+                print(self.database_url)
                 if self.only_germane is True:
                     cur.execute(ALL_STATIONS_GERMANE_QUERY)
                 else:
@@ -64,6 +69,7 @@ class DownloadReports(Thread):
                     self.get_station_report(row, conn)
                     # don't overload VA servers
                     sleep(self.pause)
+        print("Exiting...")
 
     def get_station_report(self, row: Station, conn: Connection):
         logger.info(f"Downloading report for station: {row.station_id}...")

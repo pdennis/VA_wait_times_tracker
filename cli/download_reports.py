@@ -6,9 +6,9 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     parser.add_argument(
-        "-germane",
+        "-all",
         action="store_true",
-        help="Only download reports that are in the Germane list",
+        help="Download reports from all stations, not just Germane",
     )
     parser.add_argument(
         "-pause",
@@ -26,5 +26,5 @@ if __name__ == "__main__":
     DownloadReports(
         station_id=args.station_id,
         pause=args.pause,
-        only_germane=args.germane,
+        only_germane=not args.all,
     )
