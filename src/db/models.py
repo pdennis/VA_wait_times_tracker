@@ -92,6 +92,18 @@ class StationReport:
             report = cur.fetchone()
             return report
 
+    @staticmethod
+    def by_report_hash(report_hash: bytes, conn: Connection = None) -> StationReport | None:
+        if conn:
+            with conn.cursor(row_factory=class_row(StationReport)) as cur:
+                cur.execute("select * from station_report where report_hash = %s;", (report_hash,))
+                return cur.fetchone()
+        else:
+            with psycopg.connect(DATABASE_URL) as conn:
+                with conn.cursor(row_factory=class_row(StationReport)) as cur:
+                    cur.execute("select * from station_report where report_hash = %s;", (report_hash,))
+                    return cur.fetchone()
+
 
 @dataclass
 class WaitTimeReport:

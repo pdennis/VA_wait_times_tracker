@@ -74,6 +74,7 @@ class LegacyReportLoader:
                         conn.commit()
                     except psycopg.errors.UniqueViolation:
                         conn.rollback()
+                        report = StationReport.by_report_hash(sha[0], conn)
                         logger.info(f"Report {report.file_name} already stored, continuing...")
                     np = DownloadReports.process_excel_sheets(report, sha[1], conn)
                     logger.info(f"Processed {np} sheet(s) for report {file_name}")

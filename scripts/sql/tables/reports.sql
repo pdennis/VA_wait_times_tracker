@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS station_report
 
 CREATE INDEX IF NOT EXISTS ix_station_report_station_id ON station_report (station_id);
 CREATE INDEX IF NOT EXISTS ix_station_report_downloaded ON station_report (downloaded);
+CREATE INDEX IF NOT EXISTS ix_station_report_downloaded_date ON station_report ((timezone('UTC', downloaded)::date));
 ALTER TABLE station_report
     ADD CONSTRAINT fk_station_report_station_station_id
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
@@ -37,7 +38,9 @@ ALTER TABLE wait_time_report
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
 ALTER TABLE wait_time_report
     ADD CONSTRAINT fk_wait_time_report_station_report_report_id
-        FOREIGN KEY (report_id) REFERENCES station_report (report_id) ON UPDATE CASCADE;
+        FOREIGN KEY (report_id) REFERENCES station_report (report_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;
 
 drop table if exists satisfaction_report;
 CREATE TABLE IF NOT EXISTS satisfaction_report
@@ -58,4 +61,6 @@ ALTER TABLE satisfaction_report
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
 ALTER TABLE satisfaction_report
     ADD CONSTRAINT fk_satisfaction_report_station_report_report_id
-        FOREIGN KEY (report_id) REFERENCES station_report (report_id) ON UPDATE CASCADE;
+        FOREIGN KEY (report_id) REFERENCES station_report (report_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;

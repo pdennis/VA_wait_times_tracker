@@ -228,8 +228,8 @@ class DownloadReports(Thread):
                 report.report_id,
                 row.ReportDate.date(),
                 row.AppointmentType,
-                row.EstablishedPatients,
-                row.NewPatients,
+                DownloadReports.sanitize_number(row.EstablishedPatients),
+                DownloadReports.sanitize_number(row.NewPatients),
                 row.DataSource,
             )
             wtr.insert(conn)
@@ -238,22 +238,25 @@ class DownloadReports(Thread):
     @staticmethod
     def process_satisfaction_with_care(report: StationReport, df: DataFrame, conn: Connection):
         for index, row in df.iterrows():
-            # massage Percent value
-            if isinstance(row.Percent, str):
-                percent = float(row.Percent.strip("%"))
-            elif row.Percent and math.isnan(row.Percent):
-                percent = None
-            else:
-                percent = float(row.Percent)
             sr = SatisfactionReport(
                 report.station_id,
                 report.report_id,
                 row.ReportDate.date(),
                 row.AppointmentType,
-                percent,
+                DownloadReports.sanitize_number(row.Percent),
             )
             sr.insert(conn)
         conn.commit()
+
+    @staticmethod
+    def sanitize_number(value: int | float | str | None) -> float | None:
+        if isinstance(value, str):
+            value = float(value.strip("%"))
+        elif value and math.isnan(value):
+            value = None
+        else:
+            value = float(value)
+        return value
 
 
 # Rather than use an if/elif/else loop, associate the handler method to persist
