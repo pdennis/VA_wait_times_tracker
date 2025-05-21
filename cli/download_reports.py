@@ -27,4 +27,4 @@ if __name__ == "__main__":
         station_id=args.station_id,
         pause=args.pause,
         only_germane=not args.all,
-    )
+    ).join()
