@@ -38,6 +38,11 @@ class VaViz:
 
         # Create time series plot
         st.subheader("Patient Wait Times (Days)")
+        if filtered_df["established_patient_wait_days"].isna().all():
+            filtered_df["established_patient_wait_days"] = 0
+        if filtered_df["new_patient_wait_days"].isna().all():
+            filtered_df["new_patient_wait_days"] = 0
+
         fig = px.line(
             filtered_df,
             x="report_date",
