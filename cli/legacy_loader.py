@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from argparse import ArgumentParser
 
 from src.legacy.legacy_report_loader import LegacyReportLoader
