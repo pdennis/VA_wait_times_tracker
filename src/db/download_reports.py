@@ -52,14 +52,11 @@ class DownloadReports(Thread):
                     for row in cur:
                         self.get_station_report(row, conn)
         else:
-            print(station_id, pause, only_germane)
             self.start()
 
     def run(self) -> None:
         with psycopg.connect(self.database_url) as conn:
-            print(self.database_url)
             with conn.cursor(row_factory=class_row(Station)) as cur:
-                print(self.database_url)
                 if self.only_germane is True:
                     cur.execute(ALL_STATIONS_GERMANE_QUERY)
                 else:
