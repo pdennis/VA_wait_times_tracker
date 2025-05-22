@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS facility
     mailing_address TEXT,
     state           TEXT NOT NULL,
     phones          TEXT,
+    geom            GEOMETRY,
     created         TIMESTAMP WITH TIME ZONE default NOW(),
     updated         TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility, address)
@@ -19,6 +20,7 @@ CREATE INDEX IF NOT EXISTS ix_facility_website ON facility USING btree (website)
 CREATE INDEX IF NOT EXISTS ix_facility_address ON facility USING btree (address);
 CREATE INDEX IF NOT EXISTS ix_facility_mailing_address ON facility USING btree (mailing_address);
 CREATE INDEX IF NOT EXISTS ix_facility_state ON facility USING btree (state);
+CREATE INDEX IF NOT EXISTS ix_facility_geom ON facility USING gist (geom);
 CREATE INDEX ix_facility_facility_state ON facility ((facility || ' - ' || state));
 
 drop table if exists facility_shuttered;
