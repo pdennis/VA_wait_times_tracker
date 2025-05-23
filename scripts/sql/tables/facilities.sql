@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS facility_shuttered
     phones          TEXT,
     geom            GEOMETRY,
     awol            TIMESTAMP WITH TIME ZONE default NOW(),
+    created         TIMESTAMP WITH TIME ZONE default NOW(),
+    updated         TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility)
 );
 
