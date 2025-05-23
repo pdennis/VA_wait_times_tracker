@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS facility
     mailing_address TEXT,
     state           TEXT NOT NULL,
     phones          TEXT,
+    geom            GEOMETRY,
     created         TIMESTAMP WITH TIME ZONE default NOW(),
     updated         TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility, address)
@@ -19,6 +20,7 @@ CREATE INDEX IF NOT EXISTS ix_facility_website ON facility USING btree (website)
 CREATE INDEX IF NOT EXISTS ix_facility_address ON facility USING btree (address);
 CREATE INDEX IF NOT EXISTS ix_facility_mailing_address ON facility USING btree (mailing_address);
 CREATE INDEX IF NOT EXISTS ix_facility_state ON facility USING btree (state);
+CREATE INDEX IF NOT EXISTS ix_facility_geom ON facility USING gist (geom);
 CREATE INDEX ix_facility_facility_state ON facility ((facility || ' - ' || state));
 
 drop table if exists facility_shuttered;
@@ -31,16 +33,18 @@ CREATE TABLE IF NOT EXISTS facility_shuttered
     mailing_address TEXT,
     state           TEXT NOT NULL,
     phones          TEXT,
+    geom            GEOMETRY,
     awol            TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility)
 );
 
-CREATE INDEX IF NOT EXISTS ix_facility_shuttered_station_id ON facility USING btree (station_id);
+CREATE INDEX IF NOT EXISTS ix_facility_shuttered_station_id ON facility_shuttered USING btree (station_id);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_facility ON facility_shuttered USING btree (facility);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_website ON facility_shuttered USING btree (website);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_address ON facility_shuttered USING btree (address);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_state ON facility_shuttered USING btree (state);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_awol ON facility_shuttered USING btree (awol);
+CREATE INDEX IF NOT EXISTS ix_facility_shuttered_geom ON facility_shuttered USING gist (geom);
 
 drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
@@ -227,3 +231,26 @@ BEGIN
     raise notice '% new rows inserted', r_count;
 END;
 $body$;
+
+CREATE OR REPLACE FUNCTION geocode(address text)
+    RETURNS geometry
+AS
+$$
+    import sys
+    sys.path.append('/opt/homebrew/lib/python3.12/site-packages')
+    import requests
+    try:
+        payload = {'address': address, 'benchmark': 2020, 'format': 'json'}
+        base_geocode = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress'
+        r = requests.get(base_geocode, params=payload)
+        coords = r.json()['result']['addressMatches'][0]['coordinates']
+        lon = coords['x']
+        lat = coords['y']
+        geom = f'SRID=4326;POINT({lon} {lat})'
+    except Exception as e:
+        plpy.notice(f'address failed: {address}')
+        plpy.notice(f'error: {e}')
+        geom = None
+    return geom
+$$
+    LANGUAGE 'plpython3u';
