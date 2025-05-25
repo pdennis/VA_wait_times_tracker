@@ -242,7 +242,7 @@ $$
     sys.path.append('/opt/homebrew/lib/python3.12/site-packages')
     import requests
     try:
-        payload = {'address': address, 'benchmark': 2020, 'format': 'json'}
+        payload = {'address': address, 'benchmark': "Public_AR_ACS2023", 'format': 'json'}
         base_geocode = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress'
         r = requests.get(base_geocode, params=payload)
         coords = r.json()['result']['addressMatches'][0]['coordinates']
