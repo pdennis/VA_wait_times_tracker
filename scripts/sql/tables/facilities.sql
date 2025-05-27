@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS facility
     state           TEXT NOT NULL,
     phones          TEXT,
     geom            GEOMETRY,
+    geoid           CHARACTER VARYING(4),
     created         TIMESTAMP WITH TIME ZONE default NOW(),
     updated         TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility, address)
@@ -21,7 +22,12 @@ CREATE INDEX IF NOT EXISTS ix_facility_address ON facility USING btree (address)
 CREATE INDEX IF NOT EXISTS ix_facility_mailing_address ON facility USING btree (mailing_address);
 CREATE INDEX IF NOT EXISTS ix_facility_state ON facility USING btree (state);
 CREATE INDEX IF NOT EXISTS ix_facility_geom ON facility USING gist (geom);
+CREATE INDEX IF NOT EXISTS ix_facility_geoid ON facility USING btree (geoid);
 CREATE INDEX ix_facility_facility_state ON facility ((facility || ' - ' || state));
+
+ALTER TABLE facility
+    ADD CONSTRAINT fk_facility_congress_geoid
+        FOREIGN KEY (geoid) REFERENCES congress (geoid) ON UPDATE CASCADE;
 
 drop table if exists facility_shuttered;
 CREATE TABLE IF NOT EXISTS facility_shuttered
@@ -34,6 +40,7 @@ CREATE TABLE IF NOT EXISTS facility_shuttered
     state           TEXT NOT NULL,
     phones          TEXT,
     geom            GEOMETRY,
+    geoid           CHARACTER VARYING(4),
     awol            TIMESTAMP WITH TIME ZONE default NOW(),
     created         TIMESTAMP WITH TIME ZONE default NOW(),
     updated         TIMESTAMP WITH TIME ZONE default NOW(),
@@ -47,6 +54,11 @@ CREATE INDEX IF NOT EXISTS ix_facility_shuttered_address ON facility_shuttered U
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_state ON facility_shuttered USING btree (state);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_awol ON facility_shuttered USING btree (awol);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_geom ON facility_shuttered USING gist (geom);
+CREATE INDEX IF NOT EXISTS ix_facility_shuttered_geoid ON facility_shuttered USING btree (geoid);
+
+ALTER TABLE facility_shuttered
+    ADD CONSTRAINT fk_facility_shuttered_congress_geoid
+        FOREIGN KEY (geoid) REFERENCES congress (geoid) ON UPDATE CASCADE;
 
 drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
@@ -238,17 +250,28 @@ CREATE OR REPLACE FUNCTION geocode(address text)
     RETURNS geometry
 AS
 $$
-    import sys
-    sys.path.append('/opt/homebrew/lib/python3.12/site-packages')
     import requests
+    geom = None
     try:
-        payload = {'address': address, 'benchmark': "Public_AR_ACS2023", 'format': 'json'}
+        payload = {'address': address, 'benchmark': "8", 'format': 'json'}
         base_geocode = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress'
         r = requests.get(base_geocode, params=payload)
-        coords = r.json()['result']['addressMatches'][0]['coordinates']
-        lon = coords['x']
-        lat = coords['y']
-        geom = f'SRID=4326;POINT({lon} {lat})'
+        result = r.json()['result'] if r and r.json() and 'result' in r.json() else None
+        if result and 'addressMatches' in result and result['addressMatches']:
+            coords = r.json()['result']['addressMatches'][0]['coordinates']
+            lon = coords['x']
+            lat = coords['y']
+            geom = f'SRID=4326;POINT({lon} {lat})'
+        else:
+            import os
+            token = os.environ.get("MAPBOX_API")
+            payload = {'q': address, 'access_token': token}
+            base_geocode = 'https://api.mapbox.com/search/geocode/v6/forward'
+            r = requests.get(base_geocode, params=payload)
+            result = r.json()['features'][0] if r and r.json() and 'features' in r.json() else None
+            if result and r.json()['features'] and 'geometry' in result and result['geometry']:
+                coords = result['geometry']['coordinates']
+                geom = f'SRID=4326;POINT({coords[0]} {coords[1]})'
     except Exception as e:
         plpy.notice(f'address failed: {address}')
         plpy.notice(f'error: {e}')
