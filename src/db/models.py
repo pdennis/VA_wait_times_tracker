@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Self
+from typing import Self, Any
 
 import psycopg
 from psycopg import Connection
@@ -135,6 +135,19 @@ class WaitTimeReport:
                     self.source,
                 ),
             )
+
+    @staticmethod
+    def get_max(field: str, conn: Connection = None) -> Any | None:
+        if conn:
+            with conn.cursor() as cur:
+                # noinspection PyTypeChecker
+                cur.execute(f"select max({field}) from wait_time_report;")
+                return cur.fetchone()[0]
+        else:
+            with psycopg.connect(DATABASE_URL) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"select max({field}) from wait_time_report;")
+                    return cur.fetchone()[0]
 
 
 @dataclass

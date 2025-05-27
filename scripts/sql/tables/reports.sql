@@ -42,6 +42,54 @@ ALTER TABLE wait_time_report
             ON DELETE CASCADE
             ON UPDATE CASCADE;
 
+drop table if exists wait_time_report_7;
+CREATE TABLE IF NOT EXISTS wait_time_report_7
+(
+    station_id       TEXT NOT NULL,
+    report_id        INT  NOT NULL,
+    report_date      DATE NOT NULL,
+    appointment_type TEXT NOT NULL,
+    established      REAL,
+    new              REAL,
+    PRIMARY KEY (station_id, report_date, appointment_type)
+);
+
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_7_report_id ON wait_time_report_7 (report_id);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_7_date ON wait_time_report_7 (report_date);
+CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_7_type ON wait_time_report_7 (appointment_type);
+ALTER TABLE wait_time_report_7
+    ADD CONSTRAINT fk_wait_time_report_7_station_station_id
+        FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
+ALTER TABLE wait_time_report_7
+    ADD CONSTRAINT fk_wait_time_report_7_station_report_report_id
+        FOREIGN KEY (report_id) REFERENCES station_report (report_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;
+
+drop table if exists wait_time_report_28;
+CREATE TABLE IF NOT EXISTS wait_time_report_28
+(
+    station_id       TEXT NOT NULL,
+    report_id        INT  NOT NULL,
+    report_date      DATE NOT NULL,
+    appointment_type TEXT NOT NULL,
+    established      REAL,
+    new              REAL,
+    PRIMARY KEY (station_id, report_date, appointment_type)
+);
+
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_report_id ON wait_time_report_28 (report_id);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_date ON wait_time_report_28 (report_date);
+CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_28_type ON wait_time_report_28 (appointment_type);
+ALTER TABLE wait_time_report_28
+    ADD CONSTRAINT fk_wait_time_report_28_station_station_id
+        FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
+ALTER TABLE wait_time_report_28
+    ADD CONSTRAINT fk_wait_time_report_28_station_report_report_id
+        FOREIGN KEY (report_id) REFERENCES station_report (report_id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE;
+
 drop table if exists satisfaction_report;
 CREATE TABLE IF NOT EXISTS satisfaction_report
 (
