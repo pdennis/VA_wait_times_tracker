@@ -32,25 +32,31 @@ class VaViz:
         appointment_types = self.load_appointment_type()["appointment_type"]
         selected_type = st.sidebar.selectbox("Select Appointment Type", appointment_types)
 
-        df = self.load_data(selected_state, selected_facility, selected_type)
+        filtered_df = self.load_data(selected_state, selected_facility, selected_type)
         # Filter data based on selections
-        filtered_df = df[(df["facility"] == selected_facility) & (df["appointment_type"] == selected_type)]
+        # if selected_facility == "ALL":
+        #     filtered_df = df
+        # elif selected_type == "ALL":
+        #     filtered_df = df[(df["facility"] == selected_facility)]
+        # else:
+        #     filtered_df = df[(df["facility"] == selected_facility) & (df["appointment_type"] == selected_type)]
 
-        # Create time series plot
+        # Create a time series plot
         st.subheader("Patient Wait Times (Days)")
         if filtered_df["established_patient_wait_days"].isna().all():
             filtered_df["established_patient_wait_days"] = 0
         if filtered_df["new_patient_wait_days"].isna().all():
             filtered_df["new_patient_wait_days"] = 0
 
+        #station_id = facilities[(facilities['facility'] == selected_facility)].station_id[0]
         fig = px.line(
             filtered_df,
             x="report_date",
             y=["new_patient_wait_days", "established_patient_wait_days"],
             # title=title,
             labels={
-                "new_patient_wait_days": "New Patient Wait (Days)",
-                "established_patient_wait_days": "Established Patient Wait (Days)",
+                "new_patient_wait_days": "New Patients",
+                "established_patient_wait_days": "Established Patients",
                 "report_date": "Date",
             },
         )
@@ -63,14 +69,15 @@ class VaViz:
                 "yanchor": "top",
             }
         )
-        fig.update_layout(yaxis_title="Days")
+        fig.update_layout(yaxis_title="Wait Days")
+
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
 
         # Display summary statistics
-        st.subheader("Summary Statistics (Days)")
+        st.subheader("Summary Statistics (Wait Days)")
 
-        stats_df = filtered_df[["new_patient_wait_days", "established_patient_wait_days"]].describe()
+        stats_df = filtered_df[["established_patient_wait_days", "new_patient_wait_days"]].describe()
 
         st.dataframe(stats_df)
 
@@ -87,31 +94,93 @@ class VaViz:
                 else:
                     facility = sel_facility
                     state = sel_state
-                params = (
-                    state,
-                    facility,
-                    sel_app_type,
-                )
-                df = pd.read_sql(
-                    """
-                    SELECT
-                        f.facility,
-                        f.state,
-                        w.report_date,
-                        w.appointment_type,
-                        w.established as established_patient_wait_days,
-                        w.new as new_patient_wait_days
-                    FROM wait_time_report w, facility f
-                    WHERE w.station_id = f.station_id
-                        and f.state = %s
-                        and f.facility = %s
-                        and w.appointment_type = %s
-                    order by w.report_date
-                    """,
-                    conn,
-                    params=params,
-                )
+                if facility == "ALL":
+                    if sel_app_type == "ALL":
+                        params = (
+                            state,
+                        )
+                        df = pd.read_sql(
+                            """
+                            SELECT
+                                w.report_date,
+                                avg(w.established) as established_patient_wait_days,
+                                avg(w.new) as new_patient_wait_days
+                            FROM wait_time_report w, facility f
+                            WHERE w.station_id = f.station_id
+                                and f.state = %s
+                            group by w.report_date
+                            order by w.report_date
+                            """,
+                            conn,
+                            params=params,
+                        )
+                    else:
+                        params = (
+                            state,
+                            sel_app_type,
+                        )
+                        df = pd.read_sql(
+                            """
+                            SELECT
+                                w.report_date,
+                                avg(w.established) as established_patient_wait_days,
+                                avg(w.new) as new_patient_wait_days
+                            FROM wait_time_report w, facility f
+                            WHERE w.station_id = f.station_id
+                              and f.state = %s
+                              and w.appointment_type = %s
+                            group by w.report_date
+                            order by w.report_date
+                            """,
+                            conn,
+                            params=params,
+                        )
+                elif sel_app_type == "ALL":
+                    params = (
+                        state,
+                        facility,
+                    )
+                    df = pd.read_sql(
+                        """
+                        SELECT
+                            w.report_date,
+                            avg(w.established) as established_patient_wait_days,
+                            avg(w.new) as new_patient_wait_days
+                        FROM wait_time_report w, facility f
+                        WHERE w.station_id = f.station_id
+                            and f.state = %s
+                            and f.facility = %s
+                        group by w.report_date
+                        order by w.report_date
+                        """,
+                        conn,
+                        params=params,
+                    )
+                else:
+                    params = (
+                        state,
+                        facility,
+                        sel_app_type,
+                    )
+                    df = pd.read_sql(
+                        """
+                        SELECT
+                            w.report_date,
+                            w.appointment_type,
+                            w.established as established_patient_wait_days,
+                            w.new as new_patient_wait_days
+                        FROM wait_time_report w, facility f
+                        WHERE w.station_id = f.station_id
+                            and f.state = %s
+                            and f.facility = %s
+                            and w.appointment_type = %s
+                        order by w.report_date
+                        """,
+                        conn,
+                        params=params,
+                    )
             else:
+                # return all data
                 df = pd.read_sql(
                     """
                         SELECT
@@ -135,13 +204,16 @@ class VaViz:
                 params = (sel_state,)
                 df = pd.read_sql(
                     """
-                    SELECT DISTINCT
-                        f.facility,
-                        f.state
-                    FROM wait_time_report w, facility f
-                    WHERE w.station_id = f.station_id
-                        and state = %s
-                    order by f.facility, f.state
+                    Select 'ALL' as facility
+                    UNION 
+                    select facility from (SELECT DISTINCT f.facility,
+                                                          f.state,
+                                                          f.station_id
+                                          FROM wait_time_report w,
+                                               facility f
+                                          WHERE w.station_id = f.station_id
+                                            and state = %s
+                                          order by f.facility, f.state) s
                     """,
                     conn,
                     params=params,
@@ -151,7 +223,8 @@ class VaViz:
                     """
                         SELECT DISTINCT
                             f.facility,
-                            f.state
+                            f.state,
+                            f.station_id
                         FROM wait_time_report w, facility f
                         WHERE w.station_id = f.station_id
                         order by f.facility, f.state
@@ -164,11 +237,14 @@ class VaViz:
         with psycopg.connect(self.database_url) as conn:
             df = pd.read_sql(
                 """
-                    SELECT DISTINCT
-                        w.appointment_type
-                    FROM wait_time_report w, facility f
-                    WHERE w.station_id = f.station_id
-                    order by w.appointment_type
+                        Select 'ALL' as appointment_type
+                        UNION 
+                        select appointment_type from (
+                            SELECT DISTINCT
+                            w.appointment_type
+                            FROM wait_time_report w, facility f
+                            WHERE w.station_id = f.station_id
+                            order by w.appointment_type) a
                 """,
                 conn,
             )
