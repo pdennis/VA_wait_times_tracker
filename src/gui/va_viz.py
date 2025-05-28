@@ -5,9 +5,18 @@ import streamlit as st
 
 from src.config.settings import DATABASE_URL
 
+DATA_SETS = {
+    "All Data": "wait_time_report",
+    "7-Day Averages": "wait_time_report_7",
+    "28-Day Averages": "wait_time_report_28",
+}
+
+state_index: int = 0
+
 
 class VaViz:
     def __init__(self):
+        global state_index
         self.database_url = DATABASE_URL
         if not self.database_url:
             raise ValueError("Database URL is required")
@@ -18,9 +27,13 @@ class VaViz:
         # Sidebar filters
         st.sidebar.header("Filters")
 
+        data_sets = ["All Data", "7-Day Averages", "28-Day Averages"]
+        selected_data = st.sidebar.selectbox("Select Data Set", data_sets)
+
         # state selection
         states = sorted(self.load_facilities()["state"].unique())
-        selected_state = st.sidebar.selectbox("Select State", states)
+        selected_state = st.sidebar.selectbox("Select State", states, index=state_index)
+        state_index = states.index(selected_state)
 
         # Facility selection
         # facilities = sorted(df["facility_state"].unique())
@@ -32,14 +45,7 @@ class VaViz:
         appointment_types = self.load_appointment_type()["appointment_type"]
         selected_type = st.sidebar.selectbox("Select Appointment Type", appointment_types)
 
-        filtered_df = self.load_data(selected_state, selected_facility, selected_type)
-        # Filter data based on selections
-        # if selected_facility == "ALL":
-        #     filtered_df = df
-        # elif selected_type == "ALL":
-        #     filtered_df = df[(df["facility"] == selected_facility)]
-        # else:
-        #     filtered_df = df[(df["facility"] == selected_facility) & (df["appointment_type"] == selected_type)]
+        filtered_df = self.load_data(selected_data, selected_state, selected_facility, selected_type)
 
         # Create a time series plot
         st.subheader("Patient Wait Times (Days)")
@@ -48,7 +54,7 @@ class VaViz:
         if filtered_df["new_patient_wait_days"].isna().all():
             filtered_df["new_patient_wait_days"] = 0
 
-        #station_id = facilities[(facilities['facility'] == selected_facility)].station_id[0]
+        # station_id = facilities[(facilities['facility'] == selected_facility)].station_id[0]
         fig = px.line(
             filtered_df,
             x="report_date",
@@ -86,7 +92,14 @@ class VaViz:
             st.subheader("Raw Data")
             st.dataframe(filtered_df)
 
-    def load_data(self, sel_state: str = None, sel_facility=None, sel_app_type=None):
+    def load_data(
+        self,
+        sel_data: str = None,
+        sel_state: str = None,
+        sel_facility=None,
+        sel_app_type=None,
+    ):
+        data_set = DATA_SETS.get(sel_data, "wait_time_report")
         with psycopg.connect(self.database_url) as conn:
             if sel_facility and sel_app_type:
                 if " - " in sel_facility and sel_state is None:
@@ -96,16 +109,15 @@ class VaViz:
                     state = sel_state
                 if facility == "ALL":
                     if sel_app_type == "ALL":
-                        params = (
-                            state,
-                        )
+                        # return all data for a specific state
+                        params = (state,)
                         df = pd.read_sql(
-                            """
+                            f"""
                             SELECT
                                 w.report_date,
                                 avg(w.established) as established_patient_wait_days,
                                 avg(w.new) as new_patient_wait_days
-                            FROM wait_time_report w, facility f
+                            FROM {data_set} w, facility f
                             WHERE w.station_id = f.station_id
                                 and f.state = %s
                             group by w.report_date
@@ -115,17 +127,18 @@ class VaViz:
                             params=params,
                         )
                     else:
+                        # return all data for a specific state and appointment type
                         params = (
                             state,
                             sel_app_type,
                         )
                         df = pd.read_sql(
-                            """
+                            f"""
                             SELECT
                                 w.report_date,
                                 avg(w.established) as established_patient_wait_days,
                                 avg(w.new) as new_patient_wait_days
-                            FROM wait_time_report w, facility f
+                            FROM {data_set} w, facility f
                             WHERE w.station_id = f.station_id
                               and f.state = %s
                               and w.appointment_type = %s
@@ -136,17 +149,18 @@ class VaViz:
                             params=params,
                         )
                 elif sel_app_type == "ALL":
+                    # return all data for a specific facility and state
                     params = (
                         state,
                         facility,
                     )
                     df = pd.read_sql(
-                        """
+                        f"""
                         SELECT
                             w.report_date,
                             avg(w.established) as established_patient_wait_days,
                             avg(w.new) as new_patient_wait_days
-                        FROM wait_time_report w, facility f
+                        FROM {data_set} w, facility f
                         WHERE w.station_id = f.station_id
                             and f.state = %s
                             and f.facility = %s
@@ -163,13 +177,13 @@ class VaViz:
                         sel_app_type,
                     )
                     df = pd.read_sql(
-                        """
+                        f"""
                         SELECT
                             w.report_date,
                             w.appointment_type,
                             w.established as established_patient_wait_days,
                             w.new as new_patient_wait_days
-                        FROM wait_time_report w, facility f
+                        FROM {data_set} w, facility f
                         WHERE w.station_id = f.station_id
                             and f.state = %s
                             and f.facility = %s
@@ -205,7 +219,7 @@ class VaViz:
                 df = pd.read_sql(
                     """
                     Select 'ALL' as facility
-                    UNION 
+                    UNION
                     select facility from (SELECT DISTINCT f.facility,
                                                           f.state,
                                                           f.station_id
@@ -238,7 +252,7 @@ class VaViz:
             df = pd.read_sql(
                 """
                         Select 'ALL' as appointment_type
-                        UNION 
+                        UNION
                         select appointment_type from (
                             SELECT DISTINCT
                             w.appointment_type

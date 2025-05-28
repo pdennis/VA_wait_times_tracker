@@ -26,71 +26,71 @@ ALL_STATIONS_GERMANE_QUERY = """
 
 WTR_7 = """
 with movedata as (
-select station_id, report_id, report_date, appointment_type,  
+select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 6 PRECEDING and current row) as established,
 avg(new) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 6 PRECEDING and current row) as new
 from wait_time_report where report_date >= %s - interval '14 day')
-    
+
 insert into wait_time_report_7
     select * from movedata where report_date = %s
-on conflict (station_id,report_date, appointment_type) 
+on conflict (station_id,report_date, appointment_type)
     do update set established = excluded.established, new = excluded.new;
 """
 
 WTR_28 = """
-with movedata as ( 
-select station_id, report_id, report_date, appointment_type,  
+with movedata as (
+select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 27 PRECEDING and current row) as established,
 avg(new) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 27 PRECEDING and current row) as new
 from wait_time_report where report_date >= %s - interval '40 day')
-    
+
 insert into wait_time_report_28
     select * from movedata where report_date = %s
-on conflict (station_id,report_date, appointment_type) 
+on conflict (station_id,report_date, appointment_type)
     do update set established = excluded.established, new = excluded.new;
 """
 
 WTR_7_ALL = """
 insert into wait_time_report_7
-select station_id, report_id, report_date, appointment_type,  
+select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 6 PRECEDING and current row) as established,
 avg(new) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 6 PRECEDING and current row) as new
 from wait_time_report
-on conflict (station_id,report_date, appointment_type) 
+on conflict (station_id,report_date, appointment_type)
     do update set established = excluded.established, new = excluded.new;
 """
 
 WTR_28_ALL = """
 insert into wait_time_report_28
-select station_id, report_id, report_date, appointment_type,  
+select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 27 PRECEDING and current row) as established,
 avg(new) over (
         partition by station_id, appointment_type
-        order by report_date 
+        order by report_date
         rows between 27 PRECEDING and current row) as new
 from wait_time_report
-on conflict (station_id,report_date, appointment_type) 
+on conflict (station_id,report_date, appointment_type)
     do update set established = excluded.established, new = excluded.new;
 """
 
@@ -157,9 +157,21 @@ class DownloadReports(Thread):
         last_report = WaitTimeReport.get_max("report_date", conn)
         logger.info(f"Updating stats with last report date: {last_report}")
         with conn.cursor() as cur:
-            cur.execute(WTR_7, (last_report, last_report,))
+            cur.execute(
+                WTR_7,
+                (
+                    last_report,
+                    last_report,
+                ),
+            )
             conn.commit()
-            cur.execute(WTR_28, (last_report, last_report,))
+            cur.execute(
+                WTR_28,
+                (
+                    last_report,
+                    last_report,
+                ),
+            )
             conn.commit()
 
     def get_station_report(self, row: Station, conn: Connection):
@@ -365,6 +377,7 @@ class DownloadReports(Thread):
                 logger.info("Updating wait time 7-day moving averages for all stations...")
                 cur.execute(WTR_7_ALL)
                 conn.commit()
+
 
 # Rather than use an if/elif/else loop, associate the handler method to persist
 # an Excel sheet in the dict below. This dict doubles as a means of determining

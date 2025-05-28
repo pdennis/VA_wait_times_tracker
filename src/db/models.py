@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Self, Any
+from typing import Any, Self
 
 import psycopg
 from psycopg import Connection
@@ -27,6 +27,7 @@ class FacilityStaging:
 @dataclass
 class Station:
     station_id: str
+    state: str
     prefix: str
     legacy: bool
     active: bool

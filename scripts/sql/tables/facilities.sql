@@ -64,18 +64,20 @@ drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
 (
     station_id     TEXT primary key,
+    state          CHARACTER VARYING(2) not null,
     prefix         text,
-    legacy         bool not null            default false,
+    legacy         bool                 not null default false,
     active         bool,
-    germane        bool not null            default true,
-    awol           bool not null            default False,
-    total_failures int  not null            default 0,
+    germane        bool                 not null default true,
+    awol           bool                 not null default False,
+    total_failures int                  not null default 0,
     last_report    TIMESTAMP WITH TIME ZONE,
     last_failure   TIMESTAMP WITH TIME ZONE,
-    created        TIMESTAMP WITH TIME ZONE default NOW(),
-    updated        TIMESTAMP WITH TIME ZONE default NOW()
+    created        TIMESTAMP WITH TIME ZONE      default NOW(),
+    updated        TIMESTAMP WITH TIME ZONE      default NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_station_prefix ON station USING btree (prefix);
+CREATE INDEX IF NOT EXISTS ix_station_state ON station USING btree (state);
 
 drop table if exists station_legacy;
 CREATE TABLE IF NOT EXISTS station_legacy
@@ -86,7 +88,7 @@ CREATE TABLE IF NOT EXISTS station_legacy
 --
 -- The Facility Updater job posts records to this table. It is used to
 -- update the primary facility table as well as to post records
--- to facility_Shuttered when a facility is closed.
+-- to facility_shuttered when a facility is closed.
 --
 drop table if exists facility_staging;
 CREATE TABLE IF NOT EXISTS facility_staging
