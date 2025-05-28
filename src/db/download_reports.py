@@ -22,6 +22,78 @@ VA_REPORT_URL = "https://www.accesstocare.va.gov/FacilityPerformanceData/Facilit
 ALL_STATIONS_GERMANE_QUERY = """
     select * from station where germane = true and coalesce(active, true) = True order by station_id;
 """
+
+
+WTR_7 = """
+with movedata as (
+select station_id, report_id, report_date, appointment_type,  
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 6 PRECEDING and current row) as established,
+avg(new) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 6 PRECEDING and current row) as new
+from wait_time_report where report_date >= %s - interval '14 day')
+    
+insert into wait_time_report_7
+    select * from movedata where report_date = %s
+on conflict (station_id,report_date, appointment_type) 
+    do update set established = excluded.established, new = excluded.new;
+"""
+
+WTR_28 = """
+with movedata as ( 
+select station_id, report_id, report_date, appointment_type,  
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 27 PRECEDING and current row) as established,
+avg(new) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 27 PRECEDING and current row) as new
+from wait_time_report where report_date >= %s - interval '40 day')
+    
+insert into wait_time_report_28
+    select * from movedata where report_date = %s
+on conflict (station_id,report_date, appointment_type) 
+    do update set established = excluded.established, new = excluded.new;
+"""
+
+WTR_7_ALL = """
+insert into wait_time_report_7
+select station_id, report_id, report_date, appointment_type,  
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 6 PRECEDING and current row) as established,
+avg(new) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 6 PRECEDING and current row) as new
+from wait_time_report
+on conflict (station_id,report_date, appointment_type) 
+    do update set established = excluded.established, new = excluded.new;
+"""
+
+WTR_28_ALL = """
+insert into wait_time_report_28
+select station_id, report_id, report_date, appointment_type,  
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 27 PRECEDING and current row) as established,
+avg(new) over (
+        partition by station_id, appointment_type
+        order by report_date 
+        rows between 27 PRECEDING and current row) as new
+from wait_time_report
+on conflict (station_id,report_date, appointment_type) 
+    do update set established = excluded.established, new = excluded.new;
+"""
+
 ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
 ALL_STATIONS_QUERY = "select * from station order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
@@ -36,10 +108,16 @@ class DownloadReports(Thread):
         station_id: str = None,
         pause: float = 2,
         only_germane: bool = True,
+        update_all_stats: bool = False,
     ) -> None:
+        self._is_thread = False
         self.database_url = DATABASE_URL
         if not self.database_url:
             raise ValueError("Database URL is required")
+
+        if update_all_stats is True:
+            self.update_all_stats()
+            return
 
         super().__init__(daemon=True, name="DownloadReports")
         self.pause = pause
@@ -55,6 +133,7 @@ class DownloadReports(Thread):
             self.start()
 
     def run(self) -> None:
+        self._is_thread = True
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor(row_factory=class_row(Station)) as cur:
                 if self.only_germane is True:
@@ -65,7 +144,23 @@ class DownloadReports(Thread):
                     self.get_station_report(row, conn)
                     # don't overload VA servers
                     sleep(self.pause)
+            self.update_stats(conn)
         print("Exiting...")
+
+    def join(self, timeout: float | None = None) -> None:
+        if self._is_thread is True:
+            super().join(timeout)
+
+    # noinspection PyTypeChecker
+    @staticmethod
+    def update_stats(conn: Connection):
+        last_report = WaitTimeReport.get_max("report_date", conn)
+        logger.info(f"Updating stats with last report date: {last_report}")
+        with conn.cursor() as cur:
+            cur.execute(WTR_7, (last_report, last_report,))
+            conn.commit()
+            cur.execute(WTR_28, (last_report, last_report,))
+            conn.commit()
 
     def get_station_report(self, row: Station, conn: Connection):
         logger.info(f"Downloading report for station: {row.station_id}...")
@@ -260,6 +355,16 @@ class DownloadReports(Thread):
             value = float(value)
         return value
 
+    @staticmethod
+    def update_all_stats() -> None:
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                logger.info("Updating wait time 28-day moving averages for all stations...")
+                cur.execute(WTR_28_ALL)
+                conn.commit()
+                logger.info("Updating wait time 7-day moving averages for all stations...")
+                cur.execute(WTR_7_ALL)
+                conn.commit()
 
 # Rather than use an if/elif/else loop, associate the handler method to persist
 # an Excel sheet in the dict below. This dict doubles as a means of determining

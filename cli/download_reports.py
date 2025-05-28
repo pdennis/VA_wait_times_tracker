@@ -23,10 +23,17 @@ if __name__ == "__main__":
         type=str,
         help="Only download reports for specified Station",
     )
+    parser.add_argument(
+        "-update_stats",
+        action="store_true",
+        help="Update all stats for all reports, all stations",
+    )
 
     args = parser.parse_args()
     DownloadReports(
         station_id=args.station_id,
         pause=args.pause,
         only_germane=not args.all,
+        update_all_stats=args.update_stats,
     ).join()
+
