@@ -1,12 +1,13 @@
 drop table if exists facility;
 CREATE TABLE IF NOT EXISTS facility
 (
-    station_id      TEXT NOT NULL,
-    facility        TEXT NOT NULL,
-    address         TEXT NOT NULL,
+    fid             SERIAL NOT NULL UNIQUE,
+    station_id      TEXT   NOT NULL,
+    facility        TEXT   NOT NULL,
+    address         TEXT   NOT NULL,
     website         TEXT,
     mailing_address TEXT,
-    state           TEXT NOT NULL,
+    state           TEXT   NOT NULL,
     phones          TEXT,
     geom            GEOMETRY,
     geoid           CHARACTER VARYING(4),
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS facility
     PRIMARY KEY (station_id, facility, address)
 );
 
+CREATE INDEX IF NOT EXISTS ix_facility_fid ON facility USING btree (fid);
 CREATE INDEX IF NOT EXISTS ix_facility_station_id ON facility USING btree (station_id);
 CREATE INDEX IF NOT EXISTS ix_facility_facility ON facility USING btree (facility);
 CREATE INDEX IF NOT EXISTS ix_facility_website ON facility USING btree (website);
@@ -32,6 +34,7 @@ ALTER TABLE facility
 drop table if exists facility_shuttered;
 CREATE TABLE IF NOT EXISTS facility_shuttered
 (
+    fid             INT  NOT NULL,
     station_id      TEXT NOT NULL,
     facility        TEXT NOT NULL,
     address         TEXT NOT NULL,
@@ -46,7 +49,8 @@ CREATE TABLE IF NOT EXISTS facility_shuttered
     updated         TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (station_id, facility)
 );
-
+CREATE INDEX IF NOT EXISTS ix_facility_shuttered_fid ON facility_shuttered USING btree (fid);
+CREATE INDEX IF NOT EXISTS ix_facility_shuttered_station_id ON facility_shuttered USING btree (station_id);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_station_id ON facility_shuttered USING btree (station_id);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_facility ON facility_shuttered USING btree (facility);
 CREATE INDEX IF NOT EXISTS ix_facility_shuttered_website ON facility_shuttered USING btree (website);
@@ -63,21 +67,31 @@ ALTER TABLE facility_shuttered
 drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
 (
-    station_id     TEXT primary key,
+    fid            INT                  NOT NULL UNIQUE,
+    station_id     TEXT PRIMARY KEY,
     state          CHARACTER VARYING(2) not null,
-    prefix         text,
-    legacy         bool                 not null default false,
-    active         bool,
-    germane        bool                 not null default true,
-    awol           bool                 not null default False,
-    total_failures int                  not null default 0,
+    prefix         TEXT,
+    legacy         BOOL                 NOT NULL DEFAULT FALSE,
+    active         BOOL,
+    germane        BOOL                 NOT NULL DEFAULT TRUE,
+    awol           BOOL                 NOT NULL DEFAULT FALSE,
+    total_failures INT                  NOT NULL DEFAULT 0,
     last_report    TIMESTAMP WITH TIME ZONE,
     last_failure   TIMESTAMP WITH TIME ZONE,
-    created        TIMESTAMP WITH TIME ZONE      default NOW(),
-    updated        TIMESTAMP WITH TIME ZONE      default NOW()
+    created        TIMESTAMP WITH TIME ZONE      DEFAULT NOW(),
+    updated        TIMESTAMP WITH TIME ZONE      DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS ix_station_fid ON station USING btree (fid);
 CREATE INDEX IF NOT EXISTS ix_station_prefix ON station USING btree (prefix);
 CREATE INDEX IF NOT EXISTS ix_station_state ON station USING btree (state);
+
+ALTER TABLE station
+    ADD CONSTRAINT ic_station_station_id_prefix_unique UNIQUE (station_id, prefix);
+
+ALTER TABLE station
+    ADD CONSTRAINT fk_station_facility_fid
+        FOREIGN KEY (fid) REFERENCES facility (fid) ON UPDATE CASCADE;
+
 
 drop table if exists station_legacy;
 CREATE TABLE IF NOT EXISTS station_legacy
@@ -238,8 +252,8 @@ $body$
 DECLARE
     r_count integer;
 BEGIN
-    INSERT INTO station (station_id)
-    select distinct station_id
+    INSERT INTO station (fid, station_id)
+    select distinct fid, station_id
     from facility
     order by station_id
     on conflict DO NOTHING;

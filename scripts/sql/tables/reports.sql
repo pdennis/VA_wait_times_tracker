@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS station_report
     file_name   text                     NOT NULL,
     size        int                      NOT NULL,
     report      bytea                    NOT NULL,
-    report_hash bytea                    not null unique,
-    downloaded  TIMESTAMP WITH TIME ZONE not null default NOW()
+    report_hash bytea                    NOT NULL UNIQUE,
+    downloaded  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS ix_station_report_station_id ON station_report (station_id);

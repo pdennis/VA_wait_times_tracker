@@ -26,6 +26,7 @@ class FacilityStaging:
 
 @dataclass
 class Station:
+    fid: int
     station_id: str
     state: str
     prefix: str
