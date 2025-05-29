@@ -37,3 +37,4 @@ if __name__ == "__main__":
         only_germane=not args.all,
         update_all_stats=args.update_stats,
     ).join()
+
