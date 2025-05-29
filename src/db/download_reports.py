@@ -133,8 +133,8 @@ class DownloadReports(Thread):
             self.start()
 
     def run(self) -> None:
-        logger.info("Starting Download Reports thread...")
         self._is_thread = True
+        logger.info("Starting Download Reports thread...")
         with psycopg.connect(self.database_url) as conn:
             logger.info(f"Obtained database connection: {conn}...")
             with conn.cursor(row_factory=class_row(Station)) as cur:
@@ -152,6 +152,7 @@ class DownloadReports(Thread):
         logger.info("Exiting Download Reports thread...")
 
     def join(self, timeout: float | None = None) -> None:
+        sleep(0.25)
         if self._is_thread is True:
             super().join(timeout)
 
