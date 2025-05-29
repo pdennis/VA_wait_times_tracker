@@ -144,7 +144,6 @@ class DownloadReports(Thread):
                 else:
                     cur.execute(ALL_STATIONS_ACTIVE_QUERY)
                 for row in cur:
-                    logger.info(f"Processing station: {row}...")
                     self.get_station_report(row, conn)
                     # don't overload VA servers
                     sleep(self.pause)
