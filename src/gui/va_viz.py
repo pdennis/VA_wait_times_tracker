@@ -42,7 +42,10 @@ class VaViz:
 
         # Appointment type selection
         # appointment_types = sorted(df["appointment_type"].unique())
-        appointment_types = self.load_appointment_type()["appointment_type"]
+        appointment_types = self.load_appointment_type(
+            sel_state=selected_state,
+            sel_facility=selected_facility,
+        )["appointment_type"]
         selected_type = st.sidebar.selectbox("Select Appointment Type", appointment_types)
 
         filtered_df = self.load_data(selected_data, selected_state, selected_facility, selected_type)
@@ -247,21 +250,43 @@ class VaViz:
                 )
         return df
 
-    def load_appointment_type(self):
+    def load_appointment_type(self, sel_state: str = None, sel_facility: str = None):
         with psycopg.connect(self.database_url) as conn:
-            df = pd.read_sql(
-                """
-                        Select 'ALL' as appointment_type
-                        UNION
-                        select appointment_type from (
-                            SELECT DISTINCT
-                            w.appointment_type
-                            FROM wait_time_report w, facility f
-                            WHERE w.station_id = f.station_id
-                            order by w.appointment_type) a
-                """,
-                conn,
-            )
+            if sel_facility == "ALL":
+                params = (sel_state,)
+                df = pd.read_sql(
+                    """
+                            Select 'ALL' as appointment_type
+                            UNION
+                            select appointment_type from (
+                                SELECT DISTINCT
+                                w.appointment_type
+                                FROM wait_time_report w, facility f
+                                WHERE w.station_id = f.station_id
+                                    and state = %s
+                                order by w.appointment_type) a
+                    """,
+                    conn,
+                    params=params,
+                )
+            else:
+                params = (sel_state, sel_facility)
+                df = pd.read_sql(
+                    """
+                            Select 'ALL' as appointment_type
+                            UNION
+                            select appointment_type from (
+                                SELECT DISTINCT
+                                w.appointment_type
+                                FROM wait_time_report w, facility f
+                                WHERE w.station_id = f.station_id
+                                    and f.state = %s
+                                    and f.facility = %s 
+                                order by w.appointment_type) a
+                    """,
+                    conn,
+                    params=params,
+                )
         return df
 
 
