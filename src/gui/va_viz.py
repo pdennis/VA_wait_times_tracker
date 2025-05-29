@@ -252,7 +252,7 @@ class VaViz:
 
     def load_appointment_type(self, sel_state: str = None, sel_facility: str = None):
         with psycopg.connect(self.database_url) as conn:
-            if sel_facility == "ALL":
+            if sel_facility == 'ALL':
                 params = (sel_state,)
                 df = pd.read_sql(
                     """
