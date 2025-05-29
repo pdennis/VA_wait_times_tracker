@@ -110,6 +110,7 @@ class DownloadReports(Thread):
         only_germane: bool = True,
         update_all_stats: bool = False,
     ) -> None:
+        logger.info("Starting Download Reports...")
         self._is_thread = False
         self.database_url = DATABASE_URL
         if not self.database_url:
@@ -133,7 +134,7 @@ class DownloadReports(Thread):
             self.start()
 
     def run(self) -> None:
-        logger.info("Starting DownloadReports thread...")
+        logger.info("Starting Download Reports thread...")
         self._is_thread = True
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor(row_factory=class_row(Station)) as cur:
