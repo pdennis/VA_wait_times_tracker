@@ -1,3 +1,10 @@
 /.env
 /.idea
 /download_reports_last_run
+dist/
+src/*.egg-info/
+.idea/
+.tox/
+__pycache__
+ *.pyc
+.DS_Store
