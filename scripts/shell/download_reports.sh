@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 #
 pwd
+source .zshrc
 cd /Users/davids/Documents/dev/BridgeEnv/VA_wait_times_tracker
 pwd
 source ../bin/activate
