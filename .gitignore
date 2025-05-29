@@ -1,6 +1,5 @@
 /.env
 /.idea
-/download_reports_last_run
 dist/
 src/*.egg-info/
 .idea/
@@ -8,3 +7,6 @@ src/*.egg-info/
 __pycache__
  *.pyc
 .DS_Store
+/download_reports.log
+/download_reports_last_run
+/running_download_reports
