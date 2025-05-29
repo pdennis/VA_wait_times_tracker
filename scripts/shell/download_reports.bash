@@ -6,6 +6,7 @@ pwd
 source ../bin/activate
 export PYTHONPATH=.
 touch running_download_reports
+echo $PATH
 ../bin/python cli/download_reports.py
 rm -fr running_download_reports
 touch download_reports_last_run
