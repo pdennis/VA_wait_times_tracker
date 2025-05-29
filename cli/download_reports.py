@@ -30,11 +30,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    print(f"Downloading reports with pause of {args.pause} seconds...")
     DownloadReports(
         station_id=args.station_id,
         pause=args.pause,
         only_germane=not args.all,
         update_all_stats=args.update_stats,
     ).join()
-

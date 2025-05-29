@@ -110,7 +110,6 @@ class DownloadReports(Thread):
         only_germane: bool = True,
         update_all_stats: bool = False,
     ) -> None:
-        logger.info("Starting Download Reports...")
         self._is_thread = False
         self.database_url = DATABASE_URL
         if not self.database_url:
@@ -137,17 +136,20 @@ class DownloadReports(Thread):
         logger.info("Starting Download Reports thread...")
         self._is_thread = True
         with psycopg.connect(self.database_url) as conn:
+            logger.info(f"Obtained database connection: {conn}...")
             with conn.cursor(row_factory=class_row(Station)) as cur:
+                logger.info(f"Obtained database cursor: {cur}...")
                 if self.only_germane is True:
                     cur.execute(ALL_STATIONS_GERMANE_QUERY)
                 else:
                     cur.execute(ALL_STATIONS_ACTIVE_QUERY)
                 for row in cur:
+                    logger.info(f"Processing station: {row}...")
                     self.get_station_report(row, conn)
                     # don't overload VA servers
                     sleep(self.pause)
             self.update_stats(conn)
-        print("Exiting...")
+        logger.info("Exiting Download Reports thread...")
 
     def join(self, timeout: float | None = None) -> None:
         if self._is_thread is True:
