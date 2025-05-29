@@ -28,7 +28,6 @@ class FacilityStaging:
 class Station:
     fid: int
     station_id: str
-    state: str
     prefix: str
     legacy: bool
     active: bool

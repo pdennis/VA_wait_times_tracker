@@ -67,23 +67,21 @@ ALTER TABLE facility_shuttered
 drop table if exists station cascade;
 CREATE TABLE IF NOT EXISTS station
 (
-    fid            INT                  NOT NULL UNIQUE,
+    fid            INT  NOT NULL UNIQUE,
     station_id     TEXT PRIMARY KEY,
-    state          CHARACTER VARYING(2) not null,
     prefix         TEXT,
-    legacy         BOOL                 NOT NULL DEFAULT FALSE,
+    legacy         BOOL NOT NULL            DEFAULT FALSE,
     active         BOOL,
-    germane        BOOL                 NOT NULL DEFAULT TRUE,
-    awol           BOOL                 NOT NULL DEFAULT FALSE,
-    total_failures INT                  NOT NULL DEFAULT 0,
+    germane        BOOL NOT NULL            DEFAULT TRUE,
+    awol           BOOL NOT NULL            DEFAULT FALSE,
+    total_failures INT  NOT NULL            DEFAULT 0,
     last_report    TIMESTAMP WITH TIME ZONE,
     last_failure   TIMESTAMP WITH TIME ZONE,
-    created        TIMESTAMP WITH TIME ZONE      DEFAULT NOW(),
-    updated        TIMESTAMP WITH TIME ZONE      DEFAULT NOW()
+    created        TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_station_fid ON station USING btree (fid);
 CREATE INDEX IF NOT EXISTS ix_station_prefix ON station USING btree (prefix);
-CREATE INDEX IF NOT EXISTS ix_station_state ON station USING btree (state);
 
 ALTER TABLE station
     ADD CONSTRAINT ic_station_station_id_prefix_unique UNIQUE (station_id, prefix);
