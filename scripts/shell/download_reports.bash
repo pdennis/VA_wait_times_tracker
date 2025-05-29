@@ -7,6 +7,8 @@ source ../bin/activate
 export PYTHONPATH=.
 touch running_download_reports
 echo $PATH
+echo $PYTHONPATH
+env
 ../bin/python cli/download_reports.py
 rm -fr running_download_reports
 touch download_reports_last_run
