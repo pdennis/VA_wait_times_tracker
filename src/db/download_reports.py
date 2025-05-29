@@ -134,7 +134,6 @@ class DownloadReports(Thread):
 
     def run(self) -> None:
         logger.info("Starting DownloadReports thread...")
-        return
         self._is_thread = True
         with psycopg.connect(self.database_url) as conn:
             with conn.cursor(row_factory=class_row(Station)) as cur:
