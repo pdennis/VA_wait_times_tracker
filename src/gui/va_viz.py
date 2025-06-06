@@ -1,7 +1,10 @@
+from datetime import date, datetime
+
 import pandas as pd
 import plotly.express as px
 import psycopg
 import streamlit as st
+from pandas import DataFrame
 
 from src.config.settings import DATABASE_URL
 
@@ -21,6 +24,10 @@ class VaViz:
         if not self.database_url:
             raise ValueError("Database URL is required")
 
+        self.report_data = bytes()
+        self.report_date = None
+        self.report_file_name = None
+
         st.title = "VA Facility Wait Times Analysis"
         # df = self.load_data()
 
@@ -36,17 +43,37 @@ class VaViz:
         state_index = states.index(selected_state)
 
         # Facility selection
-        # facilities = sorted(df["facility_state"].unique())
         facilities = self.load_facilities(selected_state)
         selected_facility = st.sidebar.selectbox("Select Facility", facilities)
 
         # Appointment type selection
-        # appointment_types = sorted(df["appointment_type"].unique())
         appointment_types = self.load_appointment_type(
             sel_state=selected_state,
             sel_facility=selected_facility,
         )["appointment_type"]
         selected_type = st.sidebar.selectbox("Select Appointment Type", appointment_types)
+
+        # Download Filter
+        if selected_state and selected_state != "ALL" and selected_facility and selected_facility != "ALL":
+            st.sidebar.header("Download")
+            dr = self.load_date_range(sel_state=selected_state, sel_facility=selected_facility)
+            min_date = dr["min_report_date"][0]
+            max_date = dr["max_report_date"][0]
+            self.report_date = st.sidebar.date_input(
+                "Select Date",
+                min_value=min_date,
+                max_value=max_date,
+                value=max_date,
+                on_change=self.get_wait_time_report,
+                args=(dr,),
+                key="report_date",
+            )
+            self.get_wait_time_report(dr)
+            st.sidebar.download_button(
+                label="Download Station Report",
+                file_name=self.report_file_name,
+                data=self.report_data,
+            )
 
         filtered_df = self.load_data(selected_data, selected_state, selected_facility, selected_type)
 
@@ -94,6 +121,18 @@ class VaViz:
         if st.checkbox("Show Raw Data"):
             st.subheader("Raw Data")
             st.dataframe(filtered_df)
+
+    def get_wait_time_report(self, *args, **kwargs) -> None:
+        if args and isinstance(args[0], DataFrame):
+            if "report_date" in st.session_state:
+                self.report_date = st.session_state.report_date
+            else:
+                self.report_date = datetime.now()
+            sdf = args[0]
+            station_id = sdf["station_id"][0]
+            prefix = sdf["prefix"][0]
+            self.report_file_name = f"{prefix} - {self.report_date.strftime('%Y-%m-%d')}.xlsx"
+            self.report_data = self.load_report_data(station_id, self.report_date)
 
     def load_data(
         self,
@@ -252,7 +291,7 @@ class VaViz:
 
     def load_appointment_type(self, sel_state: str = None, sel_facility: str = None):
         with psycopg.connect(self.database_url) as conn:
-            if sel_facility == 'ALL':
+            if sel_facility == "ALL":
                 params = (sel_state,)
                 df = pd.read_sql(
                     """
@@ -281,13 +320,63 @@ class VaViz:
                                 FROM wait_time_report w, facility f
                                 WHERE w.station_id = f.station_id
                                     and f.state = %s
-                                    and f.facility = %s 
+                                    and f.facility = %s
                                 order by w.appointment_type) a
                     """,
                     conn,
                     params=params,
                 )
         return df
+
+    def load_report_data(self, station_id: str = None, report_date: date = None) -> bytes:
+        with psycopg.connect(self.database_url) as conn:
+            params = (station_id, report_date)
+            df = pd.read_sql(
+                """
+                    SELECT distinct
+                        sr.station_id,
+                        sr.report_id,
+                        sr.report
+                    FROM station_report sr, wait_time_report w
+                    WHERE w.station_id = sr.station_id
+                        and w.report_id = sr.report_id
+                        and sr.station_id = %s
+                        and w.report_date = %s
+                    """,
+                conn,
+                params=params,
+            )
+            if "report" in df:
+                return df["report"][0]
+            else:
+                return bytes()
+
+    def load_date_range(self, sel_state: str = None, sel_facility: str = None) -> DataFrame | None:
+        if sel_state == "ALL" or sel_facility == "ALL":
+            return None
+        with psycopg.connect(self.database_url) as conn:
+            params = (
+                sel_state,
+                sel_facility,
+            )
+            df = pd.read_sql(
+                """
+                    SELECT
+                        w.station_id,
+                        s.prefix,
+                        min(w.report_date) min_report_date,
+                        max(w.report_date) max_report_date
+                    FROM wait_time_report w, facility f, station s
+                    WHERE w.station_id = f.station_id
+                        and w.station_id = s.station_id
+                        and f.state = %s
+                        and f.facility = %s
+                    group by w.station_id, s.prefix
+                    """,
+                conn,
+                params=params,
+            )
+            return df
 
 
 if __name__ == "__main__":
