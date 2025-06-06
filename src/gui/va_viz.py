@@ -122,7 +122,7 @@ class VaViz:
             st.subheader("Raw Data")
             st.dataframe(filtered_df)
 
-    def get_wait_time_report(self, *args, **kwargs) -> None:
+    def get_wait_time_report(self, *args) -> None:
         if args and isinstance(args[0], DataFrame):
             if "report_date" in st.session_state:
                 self.report_date = st.session_state.report_date
