@@ -1,0 +1,24 @@
+I need some help analyzing data provided by the VA. Each of the 851 treatment facilities publish each day an excel
+spreadsheet detailing the time new patients and established patients have to wait for treatment. These data is
+reported for each of the 5 to 30 medical specialties each facility provides. Not every facility provides all the 30
+possible treatment areas.
+
+We have been collecting these spreadsheets since February 18, 2025. The downloaded spreadsheets are then uploaded into
+a Postgres database table, with a row for each reporting facility and each treatment specialty. We have so far
+collected nearly 1,000,000 observations.
+
+our end goal is to build a system that alerts us when patient wait times (new or established) increase  to  a
+statistically significant degree. We want to know if:
+
+1) treatment times increase significantly for a specific treatment type at a specific facility,
+2) treatment times increase significantly at a specific facility,
+3) treatment times increase significantly for a specific treatment type across all facilities within a state,
+4) treatment times increase significantly within a state
+5) if a facility stops reporting data
+6) if a facility starts to report the same data over and over,
+7) anything else that might indicate a degradation of service that would affect Veterans served by the US.
+
+In addition to needing help analyzing the data we have already collected, we want to know what meta data we should
+collect or synthesize nightly that would help us identify negative trends in real time.
+
+https://chatgpt.com/share/68433162-8db4-8013-92eb-da2f40a9ca23
