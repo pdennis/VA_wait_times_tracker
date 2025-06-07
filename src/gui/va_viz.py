@@ -54,26 +54,40 @@ class VaViz:
         selected_type = st.sidebar.selectbox("Select Appointment Type", appointment_types)
 
         # Download Filter
-        if selected_state and selected_state != "ALL" and selected_facility and selected_facility != "ALL":
-            st.sidebar.header("Download")
+        st.sidebar.header("Download")
+        if (
+            selected_data
+            and selected_data == "All Data"
+            and selected_state
+            and selected_state != "ALL"
+            and selected_facility
+            and selected_facility != "ALL"
+        ):
             dr = self.load_date_range(sel_state=selected_state, sel_facility=selected_facility)
             min_date = dr["min_report_date"][0]
             max_date = dr["max_report_date"][0]
-            self.report_date = st.sidebar.date_input(
-                "Select Date",
-                min_value=min_date,
-                max_value=max_date,
-                value=max_date,
-                on_change=self.get_wait_time_report,
-                args=(dr,),
-                key="report_date",
-            )
-            self.get_wait_time_report(dr)
-            st.sidebar.download_button(
-                label="Download Station Report",
-                file_name=self.report_file_name,
-                data=self.report_data,
-            )
+        else:
+            dr = None
+            min_date = None
+            max_date = None
+        self.report_date = st.sidebar.date_input(
+            "Select Date",
+            min_value=min_date,
+            max_value=max_date,
+            value=max_date,
+            on_change=self.get_wait_time_report,
+            args=(dr,),
+            key="report_date",
+            disabled=(dr is None),
+        )
+        self.get_wait_time_report(dr)
+        st.sidebar.download_button(
+            label="Download Station Report",
+            file_name=self.report_file_name,
+            data=self.report_data,
+            key="download_button",
+            disabled=(dr is None),
+        )
 
         filtered_df = self.load_data(selected_data, selected_state, selected_facility, selected_type)
 
