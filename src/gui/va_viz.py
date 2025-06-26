@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import cast
 
 import pandas as pd
 import plotly.express as px
@@ -361,7 +362,7 @@ class VaViz:
                 params=params,
             )
             if "report" in df:
-                return df["report"][0]
+                return cast(bytes, df["report"][0])
             else:
                 return bytes()
 
