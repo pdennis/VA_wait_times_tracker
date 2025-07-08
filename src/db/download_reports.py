@@ -31,16 +31,43 @@ avg(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as established,
+STDDEV(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as new
-from wait_time_report where report_date >= %s - interval '14 day')
+        rows between 6 PRECEDING and current row) as new,
+stddev(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+) AS new_median
+from wait_time_report w1 where report_date >= %s - interval '14 day')
 
 insert into wait_time_report_7
     select * from movedata where report_date = %s
-on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established, new = excluded.new;
+on conflict (station_id, report_date, appointment_type)
+    do update set established = excluded.established,
+                  established_std = excluded.established_std,
+                  established_median = excluded.established_median,
+                  new = excluded.new,
+                  new_std = excluded.new_std,
+                  new_median = excluded.new_median;
 """
 
 WTR_28 = """
@@ -50,16 +77,43 @@ avg(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 27 PRECEDING and current row) as established,
+STDDEV(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 27 PRECEDING and current row) as new
-from wait_time_report where report_date >= %s - interval '40 day')
+        rows between 27 PRECEDING and current row) as new,
+stddev(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+) AS new_median
+from wait_time_report w1 where report_date >= %s - interval '40 day')
 
 insert into wait_time_report_28
     select * from movedata where report_date = %s
 on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established, new = excluded.new;
+    do update set established = excluded.established,
+                  established_std = excluded.established_std,
+                  established_median = excluded.established_median,
+                  new = excluded.new,
+                  new_std = excluded.new_std,
+                  new_median = excluded.new_median;;
 """
 
 WTR_7_ALL = """
@@ -69,13 +123,41 @@ avg(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as established,
+stddev(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as new
-from wait_time_report
+        rows between 6 PRECEDING and current row) as new,
+stddev(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+) AS new_median
+from wait_time_report w1
+
 on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established, new = excluded.new;
+    do update set established = excluded.established,
+                  established_std = excluded.established_std,
+                  established_median = excluded.established_median,
+                  new = excluded.new,
+                  new_std = excluded.new_std,
+                  new_median = excluded.new_median;
 """
 
 WTR_28_ALL = """
@@ -85,13 +167,40 @@ avg(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 27 PRECEDING and current row) as established,
+STDDEV(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 27 PRECEDING and current row) as new
-from wait_time_report
+        rows between 27 PRECEDING and current row) as new,
+stddev(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_std,
+(
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+) AS new_median
+from wait_time_report w1
 on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established, new = excluded.new;
+    do update set established = excluded.established,
+                  established_std = excluded.established_std,
+                  established_median = excluded.established_median,
+                  new = excluded.new,
+                  new_std = excluded.new_std,
+                  new_median = excluded.new_median;;
 """
 
 ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
@@ -115,7 +224,7 @@ class DownloadReports(Thread):
         if not self.database_url:
             raise ValueError("Database URL is required")
 
-        if update_all_stats is True:
+        if update_all_stats:
             self.update_all_stats()
             return
 
@@ -129,6 +238,7 @@ class DownloadReports(Thread):
                     cur.execute(STATION_QUERY, (station_id,))
                     for row in cur:
                         self.get_station_report(row, conn)
+                self.update_stats(conn)
         else:
             self.start()
 
@@ -139,7 +249,7 @@ class DownloadReports(Thread):
             logger.info(f"Obtained database connection: {conn}...")
             with conn.cursor(row_factory=class_row(Station)) as cur:
                 logger.info(f"Obtained database cursor: {cur}...")
-                if self.only_germane is True:
+                if self.only_germane:
                     cur.execute(ALL_STATIONS_GERMANE_QUERY)
                 else:
                     cur.execute(ALL_STATIONS_ACTIVE_QUERY)
@@ -152,7 +262,7 @@ class DownloadReports(Thread):
 
     def join(self, timeout: float | None = None) -> None:
         sleep(0.25)
-        if self._is_thread is True:
+        if self._is_thread:
             super().join(timeout)
 
     # noinspection PyTypeChecker
@@ -312,7 +422,7 @@ class DownloadReports(Thread):
                     of_interest_workbook = True
                 df = pd.read_excel(xls, sheet_name=sheet_name)
                 all_sheet_data.append(df.to_string().encode("utf-8"))
-            if of_interest_workbook is False:
+            if not of_interest_workbook:
                 return None
         except Exception as e:
             print(f"Error reading excel file: {e}")
