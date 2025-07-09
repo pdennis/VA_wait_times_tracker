@@ -40,7 +40,7 @@ STDDEV(established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -55,7 +55,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1 where report_date >= %s - interval '14 day')
 
@@ -86,7 +86,7 @@ STDDEV(established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -101,7 +101,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1 where report_date >= %s - interval '40 day')
 
@@ -132,7 +132,7 @@ STDDEV(established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '89 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -147,7 +147,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '89 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1 where report_date >= %s - interval '110 day')
 
@@ -178,7 +178,7 @@ stddev(established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -193,7 +193,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
@@ -221,7 +221,7 @@ STDDEV(w1.established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -236,7 +236,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
@@ -264,7 +264,7 @@ STDDEV(w1.established) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '89 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
@@ -279,7 +279,7 @@ stddev(new) over (
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
-      AND w2.report_date BETWEEN w1.report_date - INTERVAL '89 days' AND w1.report_date
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
