@@ -39,7 +39,6 @@ STDDEV(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS established_median,
@@ -55,7 +54,6 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS new_median
@@ -87,7 +85,6 @@ STDDEV(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS established_median,
@@ -103,7 +100,6 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS new_median
@@ -135,7 +131,6 @@ stddev(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS established_median,
@@ -151,7 +146,6 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS new_median
@@ -180,7 +174,6 @@ STDDEV(w1.established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS established_median,
@@ -196,7 +189,6 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
-      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS new_median
