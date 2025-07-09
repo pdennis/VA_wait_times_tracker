@@ -30,7 +30,7 @@ select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as established,
+        rows between 6 PRECEDING and current row) as established_avg,
 STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
@@ -39,13 +39,14 @@ STDDEV(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as new,
+        rows between 6 PRECEDING and current row) as new_avg,
 stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -54,6 +55,7 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS new_median
@@ -61,11 +63,11 @@ from wait_time_report w1 where report_date >= %s - interval '14 day')
 
 insert into wait_time_report_7
     select * from movedata where report_date = %s
-on conflict (station_id, report_date, appointment_type)
-    do update set established = excluded.established,
+on conflict (station_id, report_id, report_date, appointment_type)
+    do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
                   established_median = excluded.established_median,
-                  new = excluded.new,
+                  new_avg = excluded.new_avg,
                   new_std = excluded.new_std,
                   new_median = excluded.new_median;
 """
@@ -76,7 +78,7 @@ select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 27 PRECEDING and current row) as established,
+        rows between 27 PRECEDING and current row) as established_avg,
 STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
@@ -85,13 +87,14 @@ STDDEV(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 27 PRECEDING and current row) as new,
+        rows between 27 PRECEDING and current row) as new_avg,
 stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -100,6 +103,7 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS new_median
@@ -107,13 +111,13 @@ from wait_time_report w1 where report_date >= %s - interval '40 day')
 
 insert into wait_time_report_28
     select * from movedata where report_date = %s
-on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established,
+on conflict (station_id, report_id, report_date, appointment_type)
+    do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
                   established_median = excluded.established_median,
-                  new = excluded.new,
+                  new_avg = excluded.new_avg,
                   new_std = excluded.new_std,
-                  new_median = excluded.new_median;;
+                  new_median = excluded.new_median;
 """
 
 WTR_7_ALL = """
@@ -122,7 +126,7 @@ select station_id, report_id, report_date, appointment_type,
 avg(established) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as established,
+        rows between 6 PRECEDING and current row) as established_avg,
 stddev(established) over (
         partition by station_id, appointment_type
         order by report_date
@@ -131,13 +135,14 @@ stddev(established) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 6 PRECEDING and current row) as new,
+        rows between 6 PRECEDING and current row) as new_avg,
 stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -146,42 +151,43 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '6 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1
-
-on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established,
+on conflict (station_id, report_id, report_date, appointment_type)
+    do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
                   established_median = excluded.established_median,
-                  new = excluded.new,
+                  new_avg = excluded.new_avg,
                   new_std = excluded.new_std,
                   new_median = excluded.new_median;
 """
 
 WTR_28_ALL = """
 insert into wait_time_report_28
-select station_id, report_id, report_date, appointment_type,
-avg(established) over (
-        partition by station_id, appointment_type
-        order by report_date
-        rows between 27 PRECEDING and current row) as established,
-STDDEV(established) over (
-        partition by station_id, appointment_type
-        order by report_date
+select w1.station_id, w1.report_id, w1.report_date, w1.appointment_type,
+avg(w1.established) over (
+        partition by w1.station_id, w1.appointment_type
+        order by w1.report_date
+        rows between 27 PRECEDING and current row) as established_avg,
+STDDEV(w1.established) over (
+        partition by w1.station_id, w1.appointment_type
+        order by w1.report_date
         rows between 27 PRECEDING and current row) as established_std,
 (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS established_median,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
-        rows between 27 PRECEDING and current row) as new,
+        rows between 27 PRECEDING and current row) as new_avg,
 stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -190,17 +196,18 @@ stddev(new) over (
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
+      AND w2.report_id = w1.report_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '27 days' AND w1.report_date
 ) AS new_median
 from wait_time_report w1
-on conflict (station_id,report_date, appointment_type)
-    do update set established = excluded.established,
+on conflict (station_id, report_id, report_date, appointment_type)
+    do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
                   established_median = excluded.established_median,
-                  new = excluded.new,
+                  new_avg = excluded.new_avg,
                   new_std = excluded.new_std,
-                  new_median = excluded.new_median;;
+                  new_median = excluded.new_median;
 """
 
 ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"

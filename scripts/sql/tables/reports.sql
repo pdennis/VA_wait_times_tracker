@@ -27,9 +27,10 @@ CREATE TABLE IF NOT EXISTS wait_time_report
     established      REAL,
     new              REAL,
     source           TEXT,
-    PRIMARY KEY (station_id, report_date, appointment_type)
+    PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_station_id ON wait_time_report (station_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_report_id ON wait_time_report (report_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_date ON wait_time_report (report_date);
 CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_type ON wait_time_report (appointment_type);
@@ -49,15 +50,16 @@ CREATE TABLE IF NOT EXISTS wait_time_report_7
     report_id          INT  NOT NULL,
     report_date        DATE NOT NULL,
     appointment_type   TEXT NOT NULL,
-    established        REAL,
+    established_avg    REAL,
     established_std    REAL,
     established_median REAL,
-    new                REAL,
+    new_avg            REAL,
     new_std            REAL,
     new_median         REAL,
-    PRIMARY KEY (station_id, report_date, appointment_type)
+    PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_7_station_id ON wait_time_report_7 (station_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_7_report_id ON wait_time_report_7 (report_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_7_date ON wait_time_report_7 (report_date);
 CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_7_type ON wait_time_report_7 (appointment_type);
@@ -77,18 +79,19 @@ CREATE TABLE IF NOT EXISTS wait_time_report_28
     report_id          INT  NOT NULL,
     report_date        DATE NOT NULL,
     appointment_type   TEXT NOT NULL,
-    established        REAL,
+    established_avg    REAL,
     established_std    REAL,
     established_median REAL,
-    new                REAL,
+    new_avg            REAL,
     new_std            REAL,
     new_median         REAL,
-    PRIMARY KEY (station_id, report_date, appointment_type)
+    PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_station_id ON wait_time_report_28 (station_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_report_id ON wait_time_report_28 (report_id);
-CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_date ON wait_time_report_28 (report_date);
-CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_28_type ON wait_time_report_28 (appointment_type);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_report_date ON wait_time_report_28 (report_date);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_28_appointment_type ON wait_time_report_28 (appointment_type);
 ALTER TABLE wait_time_report_28
     ADD CONSTRAINT fk_wait_time_report_28_station_station_id
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
@@ -105,17 +108,19 @@ CREATE TABLE IF NOT EXISTS wait_time_report_90
     report_id          INT  NOT NULL,
     report_date        DATE NOT NULL,
     appointment_type   TEXT NOT NULL,
+    established_avg    REAL,
     established_std    REAL,
     established_median REAL,
-    new                REAL,
+    new_avg            REAL,
     new_std            REAL,
     new_median         REAL,
-    PRIMARY KEY (station_id, report_date, appointment_type)
+    PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_90_station_id ON wait_time_report_90 (station_id);
 CREATE INDEX IF NOT EXISTS ix_wait_time_report_90_report_id ON wait_time_report_90 (report_id);
-CREATE INDEX IF NOT EXISTS ix_wait_time_report_90_date ON wait_time_report_90 (report_date);
-CREATE INDEX IF NOT EXISTS ix_wait_time_appointment_90_type ON wait_time_report_90 (appointment_type);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_90_report_date ON wait_time_report_90 (report_date);
+CREATE INDEX IF NOT EXISTS ix_wait_time_report_90_appointment_type ON wait_time_report_90 (appointment_type);
 ALTER TABLE wait_time_report_90
     ADD CONSTRAINT fk_wait_time_report_90_station_station_id
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
