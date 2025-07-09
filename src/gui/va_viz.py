@@ -11,8 +11,8 @@ from src.config.settings import DATABASE_URL
 
 DATA_SETS = {
     "All Data": "wait_time_report",
-    "7-Day Averages": "wait_time_report_7",
-    "28-Day Averages": "wait_time_report_28",
+    "7-Day Averages": "wait_time_report_7_v",
+    "28-Day Averages": "wait_time_report_28_v",
 }
 
 state_index: int = 0

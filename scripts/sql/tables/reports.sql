@@ -72,6 +72,20 @@ ALTER TABLE wait_time_report_7
             ON DELETE CASCADE
             ON UPDATE CASCADE;
 
+create or replace view wait_time_report_7_v
+as
+select station_id,
+       report_id,
+       report_date,
+       appointment_type,
+       established_avg as established,
+       established_std,
+       established_median,
+       new_avg         as new,
+       new_std,
+       new_median
+from wait_time_report_7;
+
 drop table if exists wait_time_report_28;
 CREATE TABLE IF NOT EXISTS wait_time_report_28
 (
@@ -100,6 +114,20 @@ ALTER TABLE wait_time_report_28
         FOREIGN KEY (report_id) REFERENCES station_report (report_id)
             ON DELETE CASCADE
             ON UPDATE CASCADE;
+
+create or replace view wait_time_report_28_v
+as
+select station_id,
+       report_id,
+       report_date,
+       appointment_type,
+       established_avg as established,
+       established_std,
+       established_median,
+       new_avg         as new,
+       new_std,
+       new_median
+from wait_time_report_28;
 
 drop table if exists wait_time_report_90;
 CREATE TABLE IF NOT EXISTS wait_time_report_90
