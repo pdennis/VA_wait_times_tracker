@@ -759,6 +759,15 @@ on conflict (station_id, report_id, report_date, appointment_type)
                   new_q3    = excluded.new_q3;
 """
 
+UPDATE_STATION_APPOINTMENT_TYPE = """
+insert into station_appointment_type
+    select station_id, appointment_type, max(report_date)
+    from wait_time_report
+    group by station_id, appointment_type
+on conflict (station_id, appointment_type)
+    do update set last_reported = excluded.last_reported;
+"""
+
 ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
 ALL_STATIONS_QUERY = "select * from station order by station_id;"
 STATION_QUERY = "select * from station where station_id = %s;"
@@ -849,6 +858,10 @@ class DownloadReports(Thread):
                     last_report,
                     last_report,
                 ),
+            )
+            conn.commit()
+            cur.execute(
+                UPDATE_STATION_APPOINTMENT_TYPE,
             )
             conn.commit()
 
@@ -1057,6 +1070,9 @@ class DownloadReports(Thread):
                 conn.commit()
                 logger.info("Updating wait time 90-day moving averages for all stations...")
                 cur.execute(WTR_90_ALL)
+                conn.commit()
+                logger.info("Updating station appointment type last reported...")
+                cur.execute(UPDATE_STATION_APPOINTMENT_TYPE)
                 conn.commit()
 
 

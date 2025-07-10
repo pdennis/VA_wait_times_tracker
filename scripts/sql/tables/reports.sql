@@ -239,3 +239,20 @@ ALTER TABLE satisfaction_report
         FOREIGN KEY (report_id) REFERENCES station_report (report_id)
             ON DELETE CASCADE
             ON UPDATE CASCADE;
+
+
+drop table if exists station_appointment_type;
+CREATE TABLE IF NOT EXISTS station_appointment_type
+(
+    station_id       TEXT NOT NULL,
+    appointment_type TEXT NOT NULL,
+    last_reported    DATE NOT NULL,
+    PRIMARY KEY (station_id, appointment_type)
+);
+
+CREATE INDEX IF NOT EXISTS ix_station_appointment_type_station_id ON station_appointment_type (station_id);
+CREATE INDEX IF NOT EXISTS ix_station_appointment_type_appointment_type ON station_appointment_type (appointment_type);
+
+ALTER TABLE station_appointment_type
+    ADD CONSTRAINT fk_station_appointment_type_station_id
+        FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
