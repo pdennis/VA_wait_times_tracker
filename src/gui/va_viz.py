@@ -13,6 +13,7 @@ DATA_SETS = {
     "All Data": "wait_time_report",
     "7-Day Averages": "wait_time_report_7_v",
     "28-Day Averages": "wait_time_report_28_v",
+    "90-Day Averages": "wait_time_report_90_v",
 }
 
 state_index: int = 0

@@ -252,7 +252,6 @@ insert into wait_time_report_28
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
-                  established_std   = excluded.established_std,
                   established_count = excluded.established_count,
                   established_sum   = excluded.established_sum,
                   established_sumx2 = excluded.established_sumx2,
