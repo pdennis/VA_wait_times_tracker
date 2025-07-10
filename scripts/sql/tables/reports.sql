@@ -246,6 +246,7 @@ CREATE TABLE IF NOT EXISTS station_appointment_type
 (
     station_id       TEXT NOT NULL,
     appointment_type TEXT NOT NULL,
+    total_reports    INT  NOT NULL,
     last_reported    DATE NOT NULL,
     PRIMARY KEY (station_id, appointment_type)
 );
