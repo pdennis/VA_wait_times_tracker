@@ -48,11 +48,58 @@ drop view if exists last_station_report;
 create or replace view last_station_report
 as
 select station_id,
-       min(report_date) as first_report_date,
-       max(report_date) as last_report_date
+       min(report_date)            as first_report_date,
+       max(report_date)            as last_report_date,
+       count(distinct report_date) as total_reports
 from wait_time_report
 group by station_id
-order by last_report_date, station_id;
+order by station_id, last_report_date desc;
+
+drop view if exists delinquent_stations;
+create or replace view delinquent_stations
+as
+select w.station_id,
+       w.last_report_date,
+       w.total_reports,
+       f.state,
+       c.cd119fp as district,
+       f.facility,
+       f.website
+from (select station_id,
+             max(report_date)            as last_report_date,
+             count(distinct report_date) as total_reports
+      from wait_time_report
+      group by station_id
+      order by station_id, last_report_date desc) w,
+     station s,
+     facility f,
+     congress c
+where w.last_report_date < (now() - interval '7 days')
+  and s.station_id = w.station_id
+  and f.fid = s.fid
+  and c.geoid = f.geoid;
+
+drop view if exists delinquent_station_appointments;
+create or replace view delinquent_station_appointments
+as
+select w.station_id,
+       w.appointment_type,
+       extract(day from (now() - w.last_reported)) as delinquence,
+       w.last_reported,
+       w.total_reports,
+       f.state,
+       c.cd119fp                                   as district,
+       f.facility,
+       f.website
+from station_appointment_type w,
+     station s,
+     facility f,
+     congress c
+where w.last_reported < (now() - interval '7 days')
+  and s.station_id = w.station_id
+  and f.fid = s.fid
+  and c.geoid = f.geoid
+order by state, appointment_type, delinquence desc;
 
 drop view if exists wait_time_report_7_v;
 drop table if exists wait_time_report_7;
@@ -98,16 +145,18 @@ ALTER TABLE wait_time_report_7
             ON DELETE CASCADE
             ON UPDATE CASCADE;
 
+drop view if exists wait_time_report_7_v;
 create or replace view wait_time_report_7_v
 as
 select station_id,
        report_id,
        report_date,
+       extract(isodow from report_date) as report_dow,
        appointment_type,
-       established_avg as established,
+       established_avg                  as established,
        established_std,
        established_q2,
-       new_avg         as new,
+       new_avg                          as new,
        new_std,
        new_q2
 from wait_time_report_7;
@@ -156,16 +205,18 @@ ALTER TABLE wait_time_report_28
             ON DELETE CASCADE
             ON UPDATE CASCADE;
 
+drop view if exists wait_time_report_28_v;
 create or replace view wait_time_report_28_v
 as
 select station_id,
        report_id,
        report_date,
+       extract(isodow from report_date) as report_dow,
        appointment_type,
-       established_avg as established,
+       established_avg                  as established,
        established_std,
        established_q2,
-       new_avg         as new,
+       new_avg                          as new,
        new_std,
        new_q2
 from wait_time_report_28;
