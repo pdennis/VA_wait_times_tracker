@@ -43,19 +43,34 @@ ALTER TABLE wait_time_report
             ON DELETE CASCADE
             ON UPDATE CASCADE;
 
+drop view if exists wait_time_report_7_v;
 drop table if exists wait_time_report_7;
 CREATE TABLE IF NOT EXISTS wait_time_report_7
 (
-    station_id         TEXT NOT NULL,
-    report_id          INT  NOT NULL,
-    report_date        DATE NOT NULL,
-    appointment_type   TEXT NOT NULL,
-    established_avg    REAL,
-    established_std    REAL,
-    established_median REAL,
-    new_avg            REAL,
-    new_std            REAL,
-    new_median         REAL,
+    station_id        TEXT NOT NULL,
+    report_id         INT  NOT NULL,
+    report_date       DATE NOT NULL,
+    appointment_type  TEXT NOT NULL,
+    established_avg   REAL,
+    established_std   REAL,
+    established_q1    REAL,
+    established_q2    REAL,
+    established_q3    REAL,
+    established_max   REAL,
+    established_min   REAL,
+    established_sum   REAL,
+    established_sumx2 REAL,
+    established_count INT,
+    new_avg           REAL,
+    new_std           REAL,
+    new_q1            REAL,
+    new_q2            REAL,
+    new_q3            REAL,
+    new_max           REAL,
+    new_min           REAL,
+    new_sum           REAL,
+    new_sumx2         REAL,
+    new_count         INT,
     PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
@@ -80,25 +95,40 @@ select station_id,
        appointment_type,
        established_avg as established,
        established_std,
-       established_median,
+       established_q2,
        new_avg         as new,
        new_std,
-       new_median
+       new_q2
 from wait_time_report_7;
 
+drop view if exists wait_time_report_28_v;
 drop table if exists wait_time_report_28;
 CREATE TABLE IF NOT EXISTS wait_time_report_28
 (
-    station_id         TEXT NOT NULL,
-    report_id          INT  NOT NULL,
-    report_date        DATE NOT NULL,
-    appointment_type   TEXT NOT NULL,
-    established_avg    REAL,
-    established_std    REAL,
-    established_median REAL,
-    new_avg            REAL,
-    new_std            REAL,
-    new_median         REAL,
+    station_id        TEXT NOT NULL,
+    report_id         INT  NOT NULL,
+    report_date       DATE NOT NULL,
+    appointment_type  TEXT NOT NULL,
+    established_avg   REAL,
+    established_std   REAL,
+    established_q1    REAL,
+    established_q2    REAL,
+    established_q3    REAL,
+    established_max   REAL,
+    established_min   REAL,
+    established_sum   REAL,
+    established_sumx2 REAL,
+    established_count INT,
+    new_avg           REAL,
+    new_std           REAL,
+    new_q1            REAL,
+    new_q2            REAL,
+    new_q3            REAL,
+    new_max           REAL,
+    new_min           REAL,
+    new_sum           REAL,
+    new_sumx2         REAL,
+    new_count         INT,
     PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
@@ -123,25 +153,40 @@ select station_id,
        appointment_type,
        established_avg as established,
        established_std,
-       established_median,
+       established_q2,
        new_avg         as new,
        new_std,
-       new_median
+       new_q2
 from wait_time_report_28;
 
+drop view if exists wait_time_report_90_v;
 drop table if exists wait_time_report_90;
 CREATE TABLE IF NOT EXISTS wait_time_report_90
 (
-    station_id         TEXT NOT NULL,
-    report_id          INT  NOT NULL,
-    report_date        DATE NOT NULL,
-    appointment_type   TEXT NOT NULL,
-    established_avg    REAL,
-    established_std    REAL,
-    established_median REAL,
-    new_avg            REAL,
-    new_std            REAL,
-    new_median         REAL,
+    station_id        TEXT NOT NULL,
+    report_id         INT  NOT NULL,
+    report_date       DATE NOT NULL,
+    appointment_type  TEXT NOT NULL,
+    established_avg   REAL,
+    established_std   REAL,
+    established_q1    REAL,
+    established_q2    REAL,
+    established_q3    REAL,
+    established_max   REAL,
+    established_min   REAL,
+    established_sum   REAL,
+    established_sumx2 REAL,
+    established_count INT,
+    new_avg           REAL,
+    new_std           REAL,
+    new_q1            REAL,
+    new_q2            REAL,
+    new_q3            REAL,
+    new_max           REAL,
+    new_min           REAL,
+    new_sum           REAL,
+    new_sumx2         REAL,
+    new_count         INT,
     PRIMARY KEY (station_id, report_id, report_date, appointment_type)
 );
 
@@ -157,6 +202,20 @@ ALTER TABLE wait_time_report_90
         FOREIGN KEY (report_id) REFERENCES station_report (report_id)
             ON DELETE CASCADE
             ON UPDATE CASCADE;
+
+create or replace view wait_time_report_90_v
+as
+select station_id,
+       report_id,
+       report_date,
+       appointment_type,
+       established_avg as established,
+       established_std,
+       established_q2,
+       new_avg         as new,
+       new_std,
+       new_q2
+from wait_time_report_90;
 
 drop table if exists satisfaction_report;
 CREATE TABLE IF NOT EXISTS satisfaction_report

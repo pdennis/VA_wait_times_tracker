@@ -35,13 +35,45 @@ STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -50,24 +82,70 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1 where report_date >= %s - interval '14 day')
 
 insert into wait_time_report_7
     select * from movedata where report_date = %s
 on conflict (station_id, report_id, report_date, appointment_type)
-    do update set established_avg = excluded.established_avg,
-                  established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+    do update set established_avg   = excluded.established_avg,
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 WTR_28 = """
@@ -81,13 +159,45 @@ STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 27 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -96,13 +206,45 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 27 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1 where report_date >= %s - interval '40 day')
 
 insert into wait_time_report_28
@@ -110,10 +252,25 @@ insert into wait_time_report_28
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
                   established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 WTR_90 = """
@@ -127,13 +284,45 @@ STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 89 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -142,24 +331,70 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 89 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1 where report_date >= %s - interval '110 day')
 
 insert into wait_time_report_90
     select * from movedata where report_date = %s
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
-                  established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 WTR_7_ALL = """
@@ -169,17 +404,49 @@ avg(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as established_avg,
-stddev(established) over (
+STDDEV(established) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -188,41 +455,119 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 6 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 6 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '7 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
-                  established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 WTR_28_ALL = """
 insert into wait_time_report_28
 select w1.station_id, w1.report_id, w1.report_date, w1.appointment_type,
-avg(w1.established) over (
-        partition by w1.station_id, w1.appointment_type
-        order by w1.report_date
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date
         rows between 27 PRECEDING and current row) as established_avg,
-STDDEV(w1.established) over (
-        partition by w1.station_id, w1.appointment_type
-        order by w1.report_date
+STDDEV(established) over (
+        partition by station_id, appointment_type
+        order by report_date
         rows between 27 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -231,41 +576,119 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 27 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 27 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '28 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
-                  established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 WTR_90_ALL = """
 insert into wait_time_report_90
 select w1.station_id, w1.report_id, w1.report_date, w1.appointment_type,
-avg(w1.established) over (
-        partition by w1.station_id, w1.appointment_type
-        order by w1.report_date
+avg(established) over (
+        partition by station_id, appointment_type
+        order by report_date
         rows between 89 PRECEDING and current row) as established_avg,
-STDDEV(w1.established) over (
-        partition by w1.station_id, w1.appointment_type
-        order by w1.report_date
+STDDEV(established) over (
+        partition by station_id, appointment_type
+        order by report_date
         rows between 89 PRECEDING and current row) as established_std,
+COUNT(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_count,
+SUM(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_sum,
+SUM(established * established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_sumx2,
+min(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_min,
+max(established) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as established_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS established_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.established)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
-) AS established_median,
+) AS established_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.established)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS established_q3,
 avg(new) over (
         partition by station_id, appointment_type
         order by report_date
@@ -274,21 +697,67 @@ stddev(new) over (
         partition by station_id, appointment_type
         order by report_date
         rows between 89 PRECEDING and current row) as new_std,
+COUNT(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_count,
+SUM(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_sum,
+SUM(new * new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_sumx2,
+min(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_min,
+max(new) over (
+        partition by station_id, appointment_type
+        order by report_date
+        rows between 89 PRECEDING and current row) as new_max,
 (
+    SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS new_q1,(
     SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY w2.new)
     FROM wait_time_report w2
     WHERE w2.station_id = w1.station_id
       AND w2.appointment_type = w1.appointment_type
       AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
-) AS new_median
+) AS new_q2,(
+    SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY w2.new)
+    FROM wait_time_report w2
+    WHERE w2.station_id = w1.station_id
+      AND w2.appointment_type = w1.appointment_type
+      AND w2.report_date BETWEEN w1.report_date - INTERVAL '90 days' AND w1.report_date
+) AS new_q3
 from wait_time_report w1
 on conflict (station_id, report_id, report_date, appointment_type)
     do update set established_avg = excluded.established_avg,
-                  established_std = excluded.established_std,
-                  established_median = excluded.established_median,
-                  new_avg = excluded.new_avg,
-                  new_std = excluded.new_std,
-                  new_median = excluded.new_median;
+                  established_std   = excluded.established_std,
+                  established_count = excluded.established_count,
+                  established_sum   = excluded.established_sum,
+                  established_sumx2 = excluded.established_sumx2,
+                  established_min   = excluded.established_min,
+                  established_max   = excluded.established_max,
+                  established_q1    = excluded.established_q1,
+                  established_q2    = excluded.established_q2,
+                  established_q3    = excluded.established_q3,
+                  new_avg           = excluded.new_avg,
+                  new_std           = excluded.new_std,
+                  new_count = excluded.new_count,
+                  new_sum   = excluded.new_sum,
+                  new_sumx2 = excluded.new_sumx2,
+                  new_min   = excluded.new_min,
+                  new_max   = excluded.new_max,
+                  new_q1    = excluded.new_q1,
+                  new_q2    = excluded.new_q2,
+                  new_q3    = excluded.new_q3;
 """
 
 ALL_STATIONS_ACTIVE_QUERY = "select * from station where coalesce(active, true) = True order by station_id;"
@@ -369,6 +838,14 @@ class DownloadReports(Thread):
             conn.commit()
             cur.execute(
                 WTR_28,
+                (
+                    last_report,
+                    last_report,
+                ),
+            )
+            conn.commit()
+            cur.execute(
+                WTR_90,
                 (
                     last_report,
                     last_report,
@@ -573,11 +1050,14 @@ class DownloadReports(Thread):
     def update_all_stats() -> None:
         with psycopg.connect(DATABASE_URL) as conn:
             with conn.cursor() as cur:
+                logger.info("Updating wait time 7-day moving averages for all stations...")
+                cur.execute(WTR_7_ALL)
+                conn.commit()
                 logger.info("Updating wait time 28-day moving averages for all stations...")
                 cur.execute(WTR_28_ALL)
                 conn.commit()
-                logger.info("Updating wait time 7-day moving averages for all stations...")
-                cur.execute(WTR_7_ALL)
+                logger.info("Updating wait time 90-day moving averages for all stations...")
+                cur.execute(WTR_90_ALL)
                 conn.commit()
 
 
