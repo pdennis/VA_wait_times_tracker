@@ -36,7 +36,7 @@ class VaViz:
         # Sidebar filters
         st.sidebar.header("Filters")
 
-        data_sets = ["All Data", "7-Day Averages", "28-Day Averages"]
+        data_sets = ["All Data", "7-Day Averages", "28-Day Averages", "90-Day Averages"]
         selected_data = st.sidebar.selectbox("Select Data Set", data_sets)
 
         # state selection
