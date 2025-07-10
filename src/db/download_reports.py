@@ -761,11 +761,12 @@ on conflict (station_id, report_id, report_date, appointment_type)
 
 UPDATE_STATION_APPOINTMENT_TYPE = """
 insert into station_appointment_type
-    select station_id, appointment_type, count(*) as total_reports, max(report_date)
+    select station_id, appointment_type, count(*) as total_reports, min(report_date), max(report_date)
     from wait_time_report
     group by station_id, appointment_type
 on conflict (station_id, appointment_type)
     do update set last_reported = excluded.last_reported,
+                  first_reported = excluded.first_reported,
                   total_reports = excluded.total_reports;
 """
 

@@ -17,6 +17,7 @@ ALTER TABLE station_report
     ADD CONSTRAINT fk_station_report_station_station_id
         FOREIGN KEY (station_id) REFERENCES station (station_id) ON UPDATE CASCADE;
 
+drop view if exists last_station_report;
 drop table if exists wait_time_report;
 CREATE TABLE IF NOT EXISTS wait_time_report
 (
@@ -42,6 +43,16 @@ ALTER TABLE wait_time_report
         FOREIGN KEY (report_id) REFERENCES station_report (report_id)
             ON DELETE CASCADE
             ON UPDATE CASCADE;
+
+drop view if exists last_station_report;
+create or replace view last_station_report
+as
+select station_id,
+       min(report_date) as first_report_date,
+       max(report_date) as last_report_date
+from wait_time_report
+group by station_id
+order by last_report_date, station_id;
 
 drop view if exists wait_time_report_7_v;
 drop table if exists wait_time_report_7;
@@ -247,6 +258,7 @@ CREATE TABLE IF NOT EXISTS station_appointment_type
     station_id       TEXT NOT NULL,
     appointment_type TEXT NOT NULL,
     total_reports    INT  NOT NULL,
+    first_reported   DATE NOT NULL,
     last_reported    DATE NOT NULL,
     PRIMARY KEY (station_id, appointment_type)
 );
