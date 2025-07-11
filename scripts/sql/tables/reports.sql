@@ -60,9 +60,10 @@ create or replace view delinquent_stations
 as
 select w.station_id,
        w.last_report_date,
+       extract(day from (now() - w.last_report_date)) as delinquence,
        w.total_reports,
        f.state,
-       c.cd119fp as district,
+       c.cd119fp                                      as district,
        f.facility,
        f.website
 from (select station_id,
@@ -77,7 +78,8 @@ from (select station_id,
 where w.last_report_date < (now() - interval '7 days')
   and s.station_id = w.station_id
   and f.fid = s.fid
-  and c.geoid = f.geoid;
+  and c.geoid = f.geoid
+order by last_report_date desc, state, station_id;
 
 drop view if exists delinquent_station_appointments;
 create or replace view delinquent_station_appointments
@@ -99,7 +101,7 @@ where w.last_reported < (now() - interval '7 days')
   and s.station_id = w.station_id
   and f.fid = s.fid
   and c.geoid = f.geoid
-order by state, appointment_type, delinquence desc;
+order by w.last_reported desc, state, appointment_type;
 
 drop view if exists wait_time_report_7_v;
 drop table if exists wait_time_report_7;
