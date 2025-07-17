@@ -70,3 +70,9 @@ DATABASE_URL: str = os.environ.get("DATABASE_URL")
 if DATABASE_URL and DATABASE_URL.startswith("postgres:"):
     DATABASE_URL = DATABASE_URL.replace("postgres:", "postgresql:")
 logger.debug(f"Using database URL: {DATABASE_URL}")
+
+# Congress.gov API
+API_KEY_CONGRESS_GOV = os.environ.get("API_KEY_CONGRESS_GOV", None)
+API_URL_CONGRESS_GOV = os.environ.get("API_URL_CONGRESS_GOV", "https://api.congress.gov")
+API_VERSION_CONGRESS_GOV = os.environ.get("API_VERSION_CONGRESS_GOV", "v3")
+API_FORMAT_CONGRESS_GOV = os.environ.get("API_FORMAT_CONGRESS_GOV", "json")
