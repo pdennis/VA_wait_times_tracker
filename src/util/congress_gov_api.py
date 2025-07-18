@@ -34,7 +34,7 @@ class CDGClient:
 
     def __init__(
         self,
-        api_key=API_KEY_CONGRESS_GOV,
+        api_key = API_KEY_CONGRESS_GOV,
         api_url=API_URL_CONGRESS_GOV,
         api_version=API_VERSION_CONGRESS_GOV,
         response_format=API_FORMAT_CONGRESS_GOV,
