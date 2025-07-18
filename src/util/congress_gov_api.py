@@ -9,6 +9,7 @@ from ..config.settings import (
     API_URL_CONGRESS_GOV,
     API_VERSION_CONGRESS_GOV,
 )
+from ..db.models import CongressMember
 
 
 class _MethodWrapper:
@@ -33,7 +34,7 @@ class CDGClient:
 
     def __init__(
         self,
-        api_key = API_KEY_CONGRESS_GOV,
+        api_key=API_KEY_CONGRESS_GOV,
         api_url=API_URL_CONGRESS_GOV,
         api_version=API_VERSION_CONGRESS_GOV,
         response_format=API_FORMAT_CONGRESS_GOV,
@@ -76,8 +77,10 @@ class CongressGovApi:
 
         self.client = CDGClient(api_key, api_url, api_version, fmt)
 
-    def get_house_member(self, state: str, district: int) -> json:
-        return self._get_house_member(state, district)
+    def get_house_member(self, state: str, district: int) -> CongressMember:
+        cm_json = self._get_house_member(state, district)
+        member = cm_json["members"][0]
+        return CongressMember(state, district, member["name"], member["partyName"], member["bioguideId"], member)
 
     def _get_house_member(self, state: str, district: int) -> json:
         endpoint = f"member/{state}/{district}?currentMember=True"

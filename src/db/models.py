@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any, Self
@@ -175,5 +176,40 @@ class SatisfactionReport:
                     self.report_date,
                     self.appointment_type,
                     self.percent,
+                ),
+            )
+
+
+@dataclass
+class CongressMember:
+    state: str
+    district: int
+    name: str
+    party: str
+    bioguide_id: str
+    data: dict
+
+    def insert(self, conn: Connection) -> None:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                    insert into congress_member
+                        (state, district, name, party, bioguide_id, data)
+                        values (upper(%s), %s, %s, %s, %s, %s)
+                        on conflict (state, district)
+                        do update
+                            set name = excluded.name,
+                                party = excluded.party,
+                                bioguide_id = excluded.bioguide_id,
+                                data = excluded.data
+                        returning *;
+                    """,
+                (
+                    self.state,
+                    self.district,
+                    self.name,
+                    self.party,
+                    self.bioguide_id,
+                    json.dumps(self.data),
                 ),
             )
