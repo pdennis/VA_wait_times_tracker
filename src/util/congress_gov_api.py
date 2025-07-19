@@ -34,13 +34,12 @@ class CDGClient:
 
     def __init__(
         self,
-        api_key = API_KEY_CONGRESS_GOV,
+        api_key=API_KEY_CONGRESS_GOV,
         api_url=API_URL_CONGRESS_GOV,
         api_version=API_VERSION_CONGRESS_GOV,
         response_format=API_FORMAT_CONGRESS_GOV,
         raise_on_error=True,
     ):
-        print(f"Using Congress.gov API key: {api_key}")
         self.base_url = urljoin(api_url, api_version) + "/"
         self._session = requests.Session()
 
@@ -77,13 +76,15 @@ class CongressGovApi:
 
         self.client = CDGClient(api_key, api_url, api_version, fmt)
 
-    def get_house_member(self, state: str, district: int) -> CongressMember:
+    def get_house_member(self, state: str, district: int) -> CongressMember | None:
         cm_json = self._get_house_member(state, district)
-        member = cm_json["members"][0]
-        return CongressMember(state, district, member["name"], member["partyName"], member["bioguideId"], member)
+        if cm_json and "members" in cm_json and len(cm_json["members"]) > 0:
+            member = cm_json["members"][0]
+            return CongressMember(state, district, member["name"], member["partyName"], member["bioguideId"], member)
+        else:
+            return None
 
     def _get_house_member(self, state: str, district: int) -> json:
         endpoint = f"member/{state}/{district}?currentMember=True"
-        data, status_code = self.client.get(endpoint)
-        print(f"Status code: {status_code}; Data: {data}")
+        data, _ = self.client.get(endpoint)
         return data
