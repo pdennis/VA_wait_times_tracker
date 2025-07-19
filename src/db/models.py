@@ -182,6 +182,7 @@ class SatisfactionReport:
 
 @dataclass
 class CongressMember:
+    geoid: str
     state: str
     district: int
     name: str
@@ -194,17 +195,20 @@ class CongressMember:
             cur.execute(
                 """
                     insert into congress_member
-                        (state, district, name, party, bioguide_id, data)
-                        values (upper(%s), %s, %s, %s, %s, %s)
-                        on conflict (state, district)
+                        (geoid, state, district, name, party, bioguide_id, data)
+                        values (%s, upper(%s), %s, %s, %s, %s, %s)
+                        on conflict (geoid)
                         do update
-                            set name = excluded.name,
+                            set state = excluded.state,
+                                district = excluded.district,
+                                name = excluded.name,
                                 party = excluded.party,
                                 bioguide_id = excluded.bioguide_id,
                                 data = excluded.data
                         returning *;
                     """,
                 (
+                    self.geoid,
                     self.state,
                     self.district,
                     self.name,

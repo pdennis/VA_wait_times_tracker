@@ -18,13 +18,12 @@ class DownloadCongress:
                 cur.execute("select distinct state, geoid from facility where geoid is not null order by state, geoid;")
                 for row in cur:
                     state, geoid = row
-                    district = int(geoid[2:])
-                    member = self.api.get_house_member(state, district)
+                    member = self.api.get_house_member(state, geoid)
                     if member:
                         try:
                             member.insert(conn)
                             conn.commit()
-                            logger.info(f"{state} {district} Member {member.name} stored")
+                            logger.info(f"{state} {geoid} Member {member.name} stored")
                         except psycopg.errors.UniqueViolation:
                             conn.rollback()
                             logger.info(f"Member {member.name} already stored, continuing...")

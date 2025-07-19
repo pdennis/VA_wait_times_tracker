@@ -76,11 +76,20 @@ class CongressGovApi:
 
         self.client = CDGClient(api_key, api_url, api_version, fmt)
 
-    def get_house_member(self, state: str, district: int) -> CongressMember | None:
+    def get_house_member(self, state: str, geoid: str) -> CongressMember | None:
+        district: int = int(geoid[2:])
         cm_json = self._get_house_member(state, district)
         if cm_json and "members" in cm_json and len(cm_json["members"]) > 0:
             member = cm_json["members"][0]
-            return CongressMember(state, district, member["name"], member["partyName"], member["bioguideId"], member)
+            return CongressMember(
+                geoid,
+                state,
+                district,
+                member["name"],
+                member["partyName"],
+                member["bioguideId"],
+                member,
+            )
         else:
             return None
 
